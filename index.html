@@ -1,0 +1,3649 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<!-- ============================================================
+     META & TITLE
+     ============================================================ -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portfolio SPA — Dashboard</title>
+
+<!-- Google Fonts: Kanit (Thai/Display) + Fira Code (mono) -->
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+
+<!-- ============================================================
+     CSS — SECTION 1: CUSTOM PROPERTIES (CSS Variables)
+     ============================================================ -->
+<style>
+/* ── 1. DESIGN TOKENS ────────────────────────────────────────── */
+:root {
+  /* Background layers */
+  --bg-base:      #0a0c12;
+  --bg-layer:     #0f1118;
+  --bg-surface:   rgba(255,255,255,0.04);
+  --bg-hover:     rgba(255,255,255,0.07);
+
+  /* Glass effect */
+  --glass-bg:     rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.10);
+  --glass-blur:   blur(18px);
+  --glass-shine:  rgba(255,255,255,0.08);
+
+  /* Accent palette */
+  --accent-cyan:  #00d4ff;
+  --accent-violet:#9b6dff;
+  --accent-green: #00e5a0;
+  --accent-amber: #ffb547;
+  --accent-rose:  #ff6b8a;
+
+  /* Gradients */
+  --grad-cyan:    linear-gradient(135deg, #00d4ff 0%, #0099bb 100%);
+  --grad-violet:  linear-gradient(135deg, #9b6dff 0%, #6b3dcc 100%);
+  --grad-green:   linear-gradient(135deg, #00e5a0 0%, #00a870 100%);
+  --grad-amber:   linear-gradient(135deg, #ffb547 0%, #e07a00 100%);
+  --grad-hero:    linear-gradient(135deg, rgba(0,212,255,0.15), rgba(155,109,255,0.15));
+
+  /* Text */
+  --text-primary:   #e8eaf0;
+  --text-secondary: #8892a4;
+  --text-muted:     #4a5568;
+  --text-inverse:   #0a0c12;
+
+  /* Semantic */
+  --success: #00e5a0;
+  --warning: #ffb547;
+  --danger:  #ff6b8a;
+  --info:    #00d4ff;
+
+  /* Spacing scale */
+  --sp-xs:  4px;  --sp-sm: 8px;  --sp-md: 16px;
+  --sp-lg:  24px; --sp-xl: 32px; --sp-2xl: 48px; --sp-3xl: 64px;
+
+  /* Radius */
+  --r-sm: 8px;  --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-full: 9999px;
+
+  /* Font */
+  --font-body: 'Kanit', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  /* Transitions */
+  --trans-fast:   0.15s ease;
+  --trans-normal: 0.25s ease;
+  --trans-slow:   0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Shadow */
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:  0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg:  0 8px 40px rgba(0,0,0,0.5);
+  --shadow-glow-cyan:   0 0 24px rgba(0,212,255,0.25);
+  --shadow-glow-violet: 0 0 24px rgba(155,109,255,0.25);
+}
+
+/* ── 2. RESET & BASE ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Animated mesh background */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0,212,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(155,109,255,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%,  rgba(0,229,160,0.04) 0%, transparent 50%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: var(--r-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+/* ── 3. LAYOUT ────────────────────────────────────────────────── */
+.app-wrapper {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+/* ── 4. TOP NAVIGATION BAR ───────────────────────────────────── */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  padding: 0 var(--sp-xl);
+  height: 64px;
+  background: rgba(10,12,18,0.8);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.logo-mark {
+  width: 32px; height: 32px;
+  background: var(--grad-cyan);
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.topbar-search {
+  flex: 1;
+  max-width: 380px;
+  margin-left: auto;
+  position: relative;
+}
+
+.topbar-search input {
+  width: 100%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-full);
+  padding: 8px 16px 8px 40px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--trans-normal), box-shadow var(--trans-normal);
+}
+
+.topbar-search input::placeholder { color: var(--text-muted); }
+.topbar-search input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.topbar-search .search-icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  margin-left: var(--sp-md);
+}
+
+.avatar {
+  width: 36px; height: 36px;
+  background: var(--grad-violet);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color var(--trans-normal);
+}
+.avatar:hover { border-color: var(--accent-violet); }
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: var(--sp-xs);
+}
+
+/* ── 5. SIDEBAR ──────────────────────────────────────────────── */
+.sidebar {
+  background: rgba(10,12,18,0.6);
+  backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--glass-border);
+  padding: var(--sp-xl) 0;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  transition: transform var(--trans-normal);
+}
+
+.sidebar-section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: var(--sp-sm) var(--sp-lg) var(--sp-xs);
+  margin-top: var(--sp-md);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--sp-lg);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 0;
+  transition: all var(--trans-normal);
+  border-left: 3px solid transparent;
+  user-select: none;
+}
+
+.nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-left-color: rgba(0,212,255,0.3);
+}
+
+.nav-item.active {
+  background: rgba(0,212,255,0.08);
+  color: var(--accent-cyan);
+  border-left-color: var(--accent-cyan);
+}
+
+.nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+.nav-item .nav-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  background: rgba(0,212,255,0.15);
+  color: var(--accent-cyan);
+  padding: 2px 7px;
+  border-radius: var(--r-full);
+}
+
+/* ── 6. MAIN CONTENT ─────────────────────────────────────────── */
+.main-content {
+  padding: var(--sp-xl) var(--sp-2xl);
+  overflow-y: auto;
+}
+
+/* Page header */
+.page-header {
+  margin-bottom: var(--sp-xl);
+  animation: fadeSlideUp 0.5s ease both;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-header p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 300;
+}
+
+/* ── 7. GLASS CARD BASE ──────────────────────────────────────── */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shine highlight on top edge */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-shine), transparent);
+}
+
+/* ── 8. STAT CARDS (DASHBOARD) ───────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-md);
+  margin-bottom: var(--sp-xl);
+}
+
+.stat-card {
+  padding: var(--sp-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  cursor: default;
+  transition: transform var(--trans-normal), box-shadow var(--trans-normal);
+  animation: fadeSlideUp 0.5s ease both;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.10s; }
+.stat-card:nth-child(3) { animation-delay: 0.15s; }
+.stat-card:nth-child(4) { animation-delay: 0.20s; }
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.stat-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+}
+
+.stat-icon.cyan   { background: rgba(0,212,255,0.12);   box-shadow: 0 0 16px rgba(0,212,255,0.15); }
+.stat-icon.violet { background: rgba(155,109,255,0.12); box-shadow: 0 0 16px rgba(155,109,255,0.15); }
+.stat-icon.green  { background: rgba(0,229,160,0.12);   box-shadow: 0 0 16px rgba(0,229,160,0.15); }
+.stat-icon.amber  { background: rgba(255,181,71,0.12);  box-shadow: 0 0 16px rgba(255,181,71,0.15); }
+
+.stat-change {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+}
+.stat-change.up   { background: rgba(0,229,160,0.12); color: var(--success); }
+.stat-change.down { background: rgba(255,107,138,0.12); color: var(--danger); }
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+.stat-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+  margin-top: var(--sp-xs);
+}
+.stat-bar-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  transition: width 1s ease;
+}
+
+/* ── 9. SECTION TOOLBAR ──────────────────────────────────────── */
+.section-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  margin-bottom: var(--sp-md);
+  flex-wrap: wrap;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-right: auto;
+}
+
+/* Filter tabs */
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-full);
+  padding: 4px;
+}
+
+.filter-tab {
+  padding: 5px 14px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all var(--trans-normal);
+  white-space: nowrap;
+}
+
+.filter-tab:hover { color: var(--text-primary); background: var(--bg-hover); }
+.filter-tab.active { background: var(--accent-cyan); color: var(--text-inverse); font-weight: 600; }
+
+/* Sort & view buttons */
+.icon-btn {
+  width: 34px; height: 34px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  transition: all var(--trans-normal);
+}
+.icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--accent-cyan); }
+.icon-btn.active { background: rgba(0,212,255,0.1); color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+/* ── 10. PROJECT CARDS (GRID) ────────────────────────────────── */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-md);
+  margin-bottom: var(--sp-xl);
+}
+
+.projects-grid.list-view {
+  grid-template-columns: 1fr;
+}
+
+.project-card {
+  padding: var(--sp-lg);
+  cursor: pointer;
+  transition: all var(--trans-normal);
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: var(--shadow-md);
+}
+
+.project-card:active { transform: scale(0.98); }
+
+.project-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--sp-sm);
+}
+
+.project-thumb {
+  width: 42px; height: 42px;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+}
+
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+.status-dot.done    { background: var(--success); box-shadow: 0 0 6px var(--success); }
+.status-dot.active  { background: var(--accent-cyan); box-shadow: 0 0 6px var(--accent-cyan);
+                      animation: pulse 1.5s ease infinite; }
+.status-dot.paused  { background: var(--warning); }
+.status-dot.planned { background: var(--text-muted); }
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform: scale(1); }
+  50% { opacity:0.5; transform: scale(1.4); }
+}
+
+.project-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.project-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--sp-sm);
+}
+
+.tag {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  padding: 3px 9px;
+  border-radius: var(--r-full);
+  border: 1px solid;
+  font-weight: 500;
+}
+
+.tag.tech     { background: rgba(0,212,255,0.08);   color: var(--accent-cyan);   border-color: rgba(0,212,255,0.2); }
+.tag.design   { background: rgba(155,109,255,0.08); color: var(--accent-violet); border-color: rgba(155,109,255,0.2); }
+.tag.data     { background: rgba(0,229,160,0.08);   color: var(--accent-green);  border-color: rgba(0,229,160,0.2); }
+.tag.mobile   { background: rgba(255,181,71,0.08);  color: var(--accent-amber);  border-color: rgba(255,181,71,0.2); }
+.tag.ai       { background: rgba(255,107,138,0.08); color: var(--accent-rose);   border-color: rgba(255,107,138,0.2); }
+
+.project-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--sp-md);
+  padding-top: var(--sp-sm);
+  border-top: 1px solid var(--glass-border);
+}
+
+.project-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.project-progress-wrap {
+  flex: 1;
+  margin: 0 var(--sp-sm);
+}
+
+.project-progress-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+
+.project-progress-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  transition: width 0.8s ease;
+}
+
+.project-progress-pct {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 2px;
+}
+
+/* Delete btn */
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px;
+  border-radius: var(--r-sm);
+  transition: all var(--trans-fast);
+  opacity: 0;
+}
+.project-card:hover .btn-delete { opacity: 1; }
+.btn-delete:hover { background: rgba(255,107,138,0.1); color: var(--danger); }
+
+/* Empty state */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--sp-3xl) var(--sp-md);
+  color: var(--text-muted);
+  animation: fadeSlideUp 0.4s ease both;
+}
+.empty-state .empty-icon { font-size: 3rem; opacity: 0.3; margin-bottom: var(--sp-md); }
+.empty-state p { font-size: 0.88rem; font-weight: 300; }
+
+/* ── 11. ADD PROJECT FORM ────────────────────────────────────── */
+.form-section {
+  margin-bottom: var(--sp-2xl);
+}
+
+.form-card {
+  padding: var(--sp-xl);
+  animation: fadeSlideUp 0.5s ease both;
+}
+
+.form-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--sp-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full { grid-column: 1 / -1; }
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--trans-normal), box-shadow var(--trans-normal), background var(--trans-normal);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder { color: var(--text-muted); }
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--accent-cyan);
+  background: rgba(0,212,255,0.04);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+/* Validation states */
+.form-input.error,
+.form-select.error,
+.form-textarea.error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 2px rgba(255,107,138,0.15) !important;
+}
+
+.form-input.success,
+.form-select.success,
+.form-textarea.success {
+  border-color: var(--success) !important;
+}
+
+.form-select { cursor: pointer; }
+.form-select option { background: #1a1d28; color: var(--text-primary); }
+
+.form-textarea { resize: vertical; min-height: 80px; }
+
+.form-error-msg {
+  font-size: 0.72rem;
+  color: var(--danger);
+  min-height: 14px;
+  transition: opacity var(--trans-fast);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--sp-sm);
+  justify-content: flex-end;
+  margin-top: var(--sp-lg);
+  padding-top: var(--sp-md);
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--trans-normal);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Ripple effect */
+.btn::after {
+  content: '';
+  position: absolute;
+  width: 100%; height: 100%;
+  top: 0; left: 0;
+  background: rgba(255,255,255,0.08);
+  opacity: 0;
+  transition: opacity var(--trans-fast);
+}
+.btn:active::after { opacity: 1; }
+
+.btn-primary {
+  background: var(--grad-cyan);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-glow-cyan);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0,212,255,0.35);
+}
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+}
+.btn-secondary:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+
+.btn-ghost {
+  background: none;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* Loading spinner in button */
+.btn .spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+.btn.loading .spinner { display: block; }
+.btn.loading .btn-text { opacity: 0.7; }
+
+/* ── 12. SKILLS TABLE ────────────────────────────────────────── */
+.skills-section { margin-bottom: var(--sp-2xl); }
+
+.skills-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--glass-border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+thead {
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--trans-fast);
+}
+th:hover { color: var(--accent-cyan); }
+th .sort-icon { margin-left: 4px; opacity: 0.4; }
+th.sorted .sort-icon { opacity: 1; color: var(--accent-cyan); }
+
+tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background var(--trans-fast);
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+
+td { padding: 12px 16px; color: var(--text-secondary); }
+td:first-child { color: var(--text-primary); font-weight: 500; }
+
+.skill-level-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.skill-bar-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.skill-bar-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  transition: width 1s ease;
+}
+
+.level-badge {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+.level-expert  { background: rgba(0,229,160,0.12);   color: var(--success); }
+.level-advanced{ background: rgba(0,212,255,0.12);   color: var(--accent-cyan); }
+.level-mid     { background: rgba(155,109,255,0.12); color: var(--accent-violet); }
+.level-beginner{ background: rgba(255,181,71,0.12);  color: var(--accent-amber); }
+
+/* ── 13. TOAST NOTIFICATION ──────────────────────────────────── */
+#toast-container {
+  position: fixed;
+  bottom: var(--sp-xl);
+  right: var(--sp-xl);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: 12px 18px;
+  border-radius: var(--r-lg);
+  font-size: 0.84rem;
+  font-weight: 500;
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  min-width: 240px;
+  pointer-events: auto;
+  animation: toastIn 0.35s var(--trans-slow) both;
+  box-shadow: var(--shadow-lg);
+}
+
+.toast.success { background: rgba(0,229,160,0.12);   border-color: rgba(0,229,160,0.25); }
+.toast.error   { background: rgba(255,107,138,0.12); border-color: rgba(255,107,138,0.25); }
+.toast.info    { background: rgba(0,212,255,0.12);   border-color: rgba(0,212,255,0.25); }
+.toast.warning { background: rgba(255,181,71,0.12);  border-color: rgba(255,181,71,0.25); }
+
+.toast.removing { animation: toastOut 0.25s ease both; }
+
+.toast-icon { font-size: 1rem; }
+.toast-msg  { flex: 1; }
+
+/* ── 14. MODAL ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--trans-normal);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  width: min(480px, 90vw);
+  background: #151821;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-xl);
+  padding: var(--sp-xl);
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.9) translateY(20px);
+  transition: transform var(--trans-slow);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-lg);
+}
+.modal-title { font-size: 1rem; font-weight: 600; }
+.modal-close {
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-size: 1.3rem; line-height: 1;
+  transition: color var(--trans-fast);
+}
+.modal-close:hover { color: var(--text-primary); }
+
+/* ── 15. ANIMATIONS ──────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(40px); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%);
+  background-size: 200% auto;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--r-sm);
+}
+
+/* ── 16. STUDY SCHEDULE ─────────────────────────────────────── */
+.exam-banner {
+  background: linear-gradient(135deg, rgba(255,107,138,0.12), rgba(155,109,255,0.10));
+  border: 1px solid rgba(255,107,138,0.25);
+  border-radius: var(--r-lg);
+  padding: var(--sp-lg) var(--sp-xl);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-md);
+  margin-bottom: var(--sp-xl);
+  animation: fadeSlideUp 0.4s ease both;
+  flex-wrap: wrap;
+}
+.exam-banner-left { display: flex; align-items: center; gap: var(--sp-md); }
+.exam-banner-icon { font-size: 2rem; }
+.exam-banner-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.exam-banner-sub   { font-size: 0.8rem; color: var(--text-secondary); font-weight: 300; }
+
+.countdown-boxes { display: flex; gap: var(--sp-sm); }
+.countdown-box {
+  display: flex; flex-direction: column; align-items: center;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: 8px 14px; min-width: 56px;
+}
+.countdown-num {
+  font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700;
+  line-height: 1; color: var(--accent-rose);
+}
+.countdown-unit {
+  font-size: 0.6rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-muted); margin-top: 2px;
+}
+.exam-date-form {
+  display: flex; align-items: center; gap: var(--sp-sm);
+  background: rgba(255,107,138,0.08);
+  border: 1px solid rgba(255,107,138,0.2);
+  border-radius: var(--r-md); padding: 8px 14px;
+}
+.exam-date-label { font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap; }
+
+/* Study stats */
+.study-stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: var(--sp-md); margin-bottom: var(--sp-xl);
+}
+.study-stat {
+  padding: var(--sp-md) var(--sp-lg);
+  text-align: center; animation: fadeSlideUp 0.4s ease both;
+}
+.study-stat-num {
+  font-family: var(--font-mono); font-size: 1.6rem;
+  font-weight: 700; color: var(--text-primary); line-height: 1;
+}
+.study-stat-label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; font-weight: 300; }
+
+/* Subjects grid */
+.subjects-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr));
+  gap: var(--sp-md); margin-bottom: var(--sp-xl);
+}
+.subject-card {
+  padding: var(--sp-md) var(--sp-lg); cursor: pointer;
+  transition: all var(--trans-normal); border-left: 3px solid transparent;
+  animation: fadeSlideUp 0.4s ease both;
+}
+.subject-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--glass-border); }
+.subject-card.selected-subject { border-left-color: var(--accent-cyan); background: rgba(0,212,255,0.06); }
+.subject-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-sm); }
+.subject-icon { font-size: 1.5rem; }
+.subject-credit {
+  font-family: var(--font-mono); font-size: 0.68rem; padding: 2px 8px;
+  border-radius: var(--r-full); background: rgba(255,255,255,0.05);
+  color: var(--text-muted); border: 1px solid var(--glass-border);
+}
+.subject-name  { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; line-height: 1.3; }
+.subject-code  { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-bottom: var(--sp-sm); }
+.subject-progress-wrap { display: flex; align-items: center; gap: 8px; margin-top: var(--sp-sm); }
+.subject-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: var(--r-full); overflow: hidden; }
+.subject-bar-fill { height: 100%; border-radius: var(--r-full); transition: width 0.8s ease; }
+.subject-pct  { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; }
+.subject-actions { display: flex; gap: 6px; margin-top: var(--sp-sm); opacity: 0; transition: opacity var(--trans-fast); }
+.subject-card:hover .subject-actions { opacity: 1; }
+
+/* Weekly schedule */
+.schedule-table-wrap {
+  overflow-x: auto; border-radius: var(--r-lg);
+  border: 1px solid var(--glass-border); margin-bottom: var(--sp-xl);
+}
+.schedule-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.schedule-table th {
+  padding: 10px 14px; text-align: center;
+  font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-muted); cursor: default;
+}
+.schedule-table th.day-col { color: var(--text-primary); font-size: 0.78rem; }
+.schedule-table th.today-col {
+  background: rgba(0,212,255,0.08); color: var(--accent-cyan); position: relative;
+}
+.schedule-table th.today-col::after {
+  content: '▼'; position: absolute; bottom: 3px; left: 50%;
+  transform: translateX(-50%); font-size: 0.45rem; color: var(--accent-cyan);
+}
+.schedule-table td {
+  padding: 8px; vertical-align: top;
+  border-right: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.schedule-table td:first-child {
+  font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);
+  text-align: center; padding: 8px 10px;
+  background: rgba(255,255,255,0.02); white-space: nowrap; font-weight: 400;
+}
+.schedule-table tr:last-child td { border-bottom: none; }
+.schedule-table td.today-td { background: rgba(0,212,255,0.03); }
+
+/* Session block */
+.session-block {
+  padding: 6px 8px; border-radius: 6px; font-size: 0.73rem;
+  margin-bottom: 3px; cursor: pointer;
+  transition: all var(--trans-fast); line-height: 1.3;
+  position: relative; overflow: hidden; border: 1px solid transparent;
+  user-select: none;
+}
+.session-block:hover { filter: brightness(1.2); transform: scale(1.02); }
+.session-block.done-session { opacity: 0.45; }
+.session-block.done-session::after {
+  content: '✓'; position: absolute; top: 3px; right: 5px;
+  font-size: 0.65rem; color: var(--success);
+}
+.session-name     { font-weight: 600; color: var(--text-primary); }
+.session-duration { font-family: var(--font-mono); font-size: 0.62rem; color: rgba(255,255,255,0.45); margin-top: 1px; }
+
+/* 8 color slots */
+.sc-0 { background: rgba(0,212,255,0.15);   border-color: rgba(0,212,255,0.25); }
+.sc-1 { background: rgba(155,109,255,0.15); border-color: rgba(155,109,255,0.25); }
+.sc-2 { background: rgba(0,229,160,0.15);   border-color: rgba(0,229,160,0.25); }
+.sc-3 { background: rgba(255,181,71,0.15);  border-color: rgba(255,181,71,0.25); }
+.sc-4 { background: rgba(255,107,138,0.15); border-color: rgba(255,107,138,0.25); }
+.sc-5 { background: rgba(100,200,255,0.12); border-color: rgba(100,200,255,0.2); }
+.sc-6 { background: rgba(200,155,255,0.12); border-color: rgba(200,155,255,0.2); }
+.sc-7 { background: rgba(100,230,180,0.12); border-color: rgba(100,230,180,0.2); }
+
+/* Add session panel */
+.add-session-panel { padding: var(--sp-lg); margin-bottom: var(--sp-xl); animation: fadeSlideUp 0.35s ease both; }
+.panel-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  gap: var(--sp-sm); align-items: end;
+}
+
+/* ── 17. RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .app-wrapper { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 64px; left: 0; bottom: 0;
+    width: 240px;
+    z-index: 90;
+    transform: translateX(-100%);
+  }
+  .sidebar.open { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.6); }
+  .main-content { padding: var(--sp-lg); }
+  .hamburger { display: flex; }
+  .topbar-logo span { display: none; }
+}
+
+@media (max-width: 760px) {
+  .study-stats-row { grid-template-columns: repeat(2,1fr); }
+  .panel-row { grid-template-columns: 1fr 1fr; }
+  .panel-row .btn { grid-column: 1/-1; }
+  .countdown-boxes { flex-wrap: wrap; }
+}
+
+  .stats-grid { grid-template-columns: 1fr; }
+  .form-grid  { grid-template-columns: 1fr; }
+  .form-group.full { grid-column: 1; }
+  .filter-tabs { flex-wrap: wrap; }
+  .topbar { padding: 0 var(--sp-md); }
+  .main-content { padding: var(--sp-md); }
+  #toast-container { left: var(--sp-md); right: var(--sp-md); }
+}
+
+/* ── 17. STUDY TIMER PAGE ────────────────────────────────────── */
+
+/* Timer inner layout */
+.timer-page-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+.timer-left-col  { display: flex; flex-direction: column; gap: 18px; }
+.timer-right-col { display: flex; flex-direction: column; gap: 18px; }
+
+/* XP Bar in header area */
+.timer-xp-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  padding: 14px 20px;
+  margin-bottom: 4px;
+}
+.t-streak-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.25);
+  border-radius: var(--r-md);
+  padding: 6px 12px;
+  font-size: 0.8rem; color: #fbbf24; font-weight: 600; white-space: nowrap;
+}
+.t-lv-badge {
+  display: flex; flex-direction: column; align-items: center;
+  background: rgba(167,139,250,0.1);
+  border: 1px solid rgba(167,139,250,0.25);
+  border-radius: var(--r-md);
+  padding: 5px 12px; min-width: 52px;
+}
+.t-lv-num   { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: #a78bfa; line-height: 1; }
+.t-lv-label { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.t-xp-wrap  { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+.t-xp-top   { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-secondary); }
+.t-xp-track { height: 7px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; border: 1px solid var(--glass-border); }
+.t-xp-fill  { height: 100%; background: linear-gradient(90deg,#7c5cfa,#a78bfa,#f472b6); border-radius: 99px; transition: width 0.6s ease; box-shadow: 0 0 8px rgba(167,139,250,0.5); }
+.t-date-chip { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 99px; padding: 4px 12px; white-space: nowrap; margin-left: auto; }
+
+/* Subject selector card */
+.t-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--r-lg); position: relative; overflow: hidden; }
+.t-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); }
+.t-card-body { padding: 20px 22px; }
+.t-card-label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.t-card-label::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
+
+/* TCAS chips */
+.t-tcas-row { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 7px; }
+.t-tcas-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.t-tcas-chip {
+  font-size: 0.68rem; padding: 3px 9px;
+  border-radius: 99px; border: 1px solid var(--glass-border);
+  color: var(--text-muted); cursor: pointer;
+  background: rgba(255,255,255,0.02);
+  transition: all var(--trans-normal); white-space: nowrap; user-select: none;
+}
+.t-tcas-chip:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+/* Subject pills */
+.t-subj-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; min-height: 32px; }
+.t-subj-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 13px; border-radius: 99px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.03);
+  font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--trans-normal); user-select: none; white-space: nowrap;
+}
+.t-subj-pill:hover { border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,0.08); transform: translateY(-1px); }
+.t-subj-pill.active { border-color: #a78bfa; background: rgba(167,139,250,0.15); color: #a78bfa; font-weight: 600; box-shadow: 0 0 10px rgba(167,139,250,0.2); }
+.t-subj-rm { font-size: 0.6rem; opacity: 0.5; cursor: pointer; margin-left: 2px; }
+.t-subj-rm:hover { opacity: 1; }
+
+/* Add subject row */
+.t-add-row { display: flex; gap: 7px; align-items: center; }
+.t-emoji-in { width: 40px; text-align: center; font-size: 1rem; }
+.t-color-dots { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+.t-color-dot { width: 16px; height: 16px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all var(--trans-fast); flex-shrink: 0; }
+.t-color-dot:hover { transform: scale(1.2); }
+.t-color-dot.chosen { border-color: white; transform: scale(1.15); }
+
+/* Timer clock */
+.t-timer-card { padding: 24px 22px; text-align: center; }
+.t-subj-cur-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; height: 16px; }
+.t-subj-cur-name  { font-size: 0.95rem; font-weight: 700; margin-bottom: 18px; min-height: 22px; transition: color 0.3s; }
+
+.t-mode-tabs { display: inline-flex; gap: 3px; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 99px; padding: 4px; margin-bottom: 16px; }
+.t-mode-tab { padding: 5px 14px; border-radius: 99px; font-family: var(--font-body); font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); background: none; border: none; cursor: pointer; transition: all var(--trans-normal); white-space: nowrap; }
+.t-mode-tab:hover { color: var(--text-primary); }
+.t-mode-tab.active { background: #a78bfa; color: #0a0c12; box-shadow: 0 2px 10px rgba(167,139,250,0.4); }
+
+/* Clock ring */
+.t-clock-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto 18px; }
+.t-clock-svg { width: 200px; height: 200px; transform: rotate(-90deg); }
+.t-ring-bg    { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 10; }
+.t-ring-track { fill: none; stroke: #a78bfa; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.4s; }
+.t-clock-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; width: 150px; }
+.t-clock-time { font-family: var(--font-mono); font-size: 2.7rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: var(--text-primary); }
+.t-clock-mode { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 5px; color: var(--text-muted); }
+
+.t-clock-wrap.running .t-ring-track { filter: drop-shadow(0 0 6px #a78bfa); }
+.t-clock-wrap.running::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 1px solid #a78bfa; opacity: 0; animation: t-ripple 2s ease-out infinite; }
+@keyframes t-ripple { from { opacity: 0.4; transform: scale(0.95); } to { opacity: 0; transform: scale(1.08); } }
+
+/* Pom dots */
+.t-pom-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 10px; }
+.t-pom-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.3s; }
+.t-pom-dot.lit { background: #a78bfa; box-shadow: 0 0 8px rgba(167,139,250,0.6); }
+.t-pom-dot.lit.brk { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.6); }
+.t-pom-lbl { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-left: 6px; }
+
+/* Controls */
+.t-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px; }
+.t-ctrl-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.04); color: var(--text-secondary); cursor: pointer; font-size: 1rem; display: grid; place-items: center; transition: all var(--trans-normal); }
+.t-ctrl-btn:hover { border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,0.1); }
+.t-play-btn { width: 60px; height: 60px; border-radius: 50%; border: none; background: linear-gradient(135deg, #a78bfa, #7c5cfa); color: white; cursor: pointer; font-size: 1.4rem; display: grid; place-items: center; box-shadow: 0 0 24px rgba(167,139,250,0.35); transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+.t-play-btn:hover { transform: scale(1.08); box-shadow: 0 0 36px rgba(167,139,250,0.5); }
+.t-play-btn:active { transform: scale(0.95); }
+.t-play-btn.brk { background: linear-gradient(135deg, #34d399, #059669); box-shadow: 0 0 24px rgba(52,211,153,0.35); }
+
+/* Custom time row */
+.t-custom-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 0.72rem; color: var(--text-muted); }
+.t-num-in { width: 55px; text-align: center; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 8px; padding: 5px 8px; font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-primary); outline: none; transition: border-color var(--trans-fast); }
+.t-num-in:focus { border-color: #a78bfa; }
+.t-settings-row { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; font-size: 0.7rem; color: var(--text-muted); }
+.t-settings-row span { display: flex; align-items: center; gap: 5px; }
+
+/* Session log */
+.t-log-list { display: flex; flex-direction: column; gap: 7px; max-height: 260px; overflow-y: auto; padding-right: 4px; }
+.t-log-item { display: flex; align-items: center; gap: 9px; padding: 9px 13px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: var(--r-md); animation: fadeSlideUp 0.3s ease both; transition: border-color var(--trans-fast); }
+.t-log-item:hover { border-color: rgba(255,255,255,0.13); }
+.t-log-emoji { font-size: 1.1rem; flex-shrink: 0; }
+.t-log-body  { flex: 1; min-width: 0; }
+.t-log-subj  { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-log-meta  { font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 1px; }
+.t-log-dur   { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; color: #34d399; white-space: nowrap; flex-shrink: 0; }
+.t-log-xp    { font-family: var(--font-mono); font-size: 0.68rem; color: #a78bfa; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); padding: 2px 7px; border-radius: 99px; flex-shrink: 0; }
+.t-empty-log { text-align: center; padding: 36px 16px; color: var(--text-muted); }
+.t-empty-log .big { font-size: 2.2rem; opacity: 0.25; margin-bottom: 8px; }
+.t-empty-log p { font-size: 0.78rem; line-height: 1.7; }
+
+/* Timer stat boxes */
+.t-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.t-stat-box { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: var(--r-md); padding: 12px 14px; text-align: center; transition: border-color var(--trans-fast); }
+.t-stat-box:hover { border-color: rgba(255,255,255,0.12); }
+.t-stat-num   { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 600; line-height: 1; color: var(--text-primary); }
+.t-stat-label { font-size: 0.68rem; color: var(--text-muted); margin-top: 3px; font-weight: 300; }
+
+/* Goal ring */
+.t-goal-wrap   { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+.t-goal-svg-ww { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
+.t-goal-svg    { width: 76px; height: 76px; transform: rotate(-90deg); }
+.t-goal-bg     { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 7; }
+.t-goal-ring   { fill: none; stroke: var(--accent-cyan); stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+.t-goal-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+.t-goal-pct    { font-family: var(--font-mono); font-size: 0.98rem; font-weight: 600; color: var(--accent-cyan); line-height: 1; }
+.t-goal-info   { flex: 1; }
+.t-goal-title  { font-size: 0.88rem; font-weight: 700; margin-bottom: 3px; }
+.t-goal-sub    { font-size: 0.75rem; color: var(--text-secondary); font-weight: 300; margin-bottom: 8px; }
+.t-goal-set    { display: flex; align-items: center; gap: 7px; font-size: 0.75rem; color: var(--text-muted); }
+
+/* Motivation */
+.t-motiv { background: rgba(34,211,238,0.07); border: 1px solid rgba(34,211,238,0.18); border-radius: var(--r-md); padding: 9px 13px; font-size: 0.78rem; color: var(--accent-cyan); font-weight: 500; text-align: center; line-height: 1.4; }
+
+/* Breakdown */
+.t-breakdown-list { display: flex; flex-direction: column; gap: 9px; }
+.t-bk-item { display: flex; align-items: center; gap: 9px; }
+.t-bk-icon { font-size: 1rem; flex-shrink: 0; }
+.t-bk-info { flex: 1; min-width: 0; }
+.t-bk-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-bk-time { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); }
+.t-bk-bar-w { flex-shrink: 0; width: 76px; }
+.t-bk-bar  { height: 4px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.t-bk-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+.t-bk-pct  { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); text-align: right; margin-top: 2px; }
+
+/* Achievements */
+.t-ach-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.t-badge { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 5px; border-radius: var(--r-md); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.02); transition: all var(--trans-normal); cursor: default; }
+.t-badge:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+.t-badge.earned { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.07); }
+.t-badge-icon { font-size: 1.3rem; filter: grayscale(1) opacity(0.3); transition: filter var(--trans-normal); }
+.t-badge.earned .t-badge-icon { filter: none; }
+.t-badge-name { font-size: 0.56rem; text-align: center; color: var(--text-muted); line-height: 1.3; }
+.t-badge.earned .t-badge-name { color: #fbbf24; }
+
+/* XP float */
+.t-xp-popup { position: fixed; font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: #a78bfa; pointer-events: none; z-index: 998; text-shadow: 0 0 12px rgba(167,139,250,0.7); animation: t-xpFloat 1.6s ease both; }
+@keyframes t-xpFloat { 0%{opacity:1;transform:translateY(0) scale(1.2);} 80%{opacity:1;transform:translateY(-50px) scale(1);} 100%{opacity:0;transform:translateY(-70px) scale(0.9);} }
+
+@media (max-width: 860px) {
+  .timer-page-grid { grid-template-columns: 1fr; }
+  .timer-right-col { order: -1; }
+  .t-stats-grid { grid-template-columns: repeat(4,1fr); }
+}
+@media (max-width: 560px) {
+  .t-stats-grid { grid-template-columns: repeat(2,1fr); }
+  .t-ach-grid { grid-template-columns: repeat(4,1fr); }
+  .t-clock-wrap { width: 170px; height: 170px; }
+  .t-clock-svg  { width: 170px; height: 170px; }
+  .t-clock-time { font-size: 2.2rem; }
+}
+
+/* ── 18. VIEW TRANSITIONS ────────────────────────────────────── */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* Highlight on save */
+@keyframes highlightPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(0,212,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,212,255,0); }
+}
+.highlight-new { animation: highlightPulse 0.8s ease; }
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     HTML STRUCTURE
+     ============================================================ -->
+
+<!-- ── SUBJECT MODAL ── -->
+<div class="modal-overlay" id="subjectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📚 เพิ่มวิชาใหม่</span>
+      <button class="modal-close" onclick="closeSubjectModal()">×</button>
+    </div>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:var(--sp-md)">
+      <div class="form-group">
+        <label class="form-label">ชื่อวิชา *</label>
+        <input class="form-input" type="text" id="subName" placeholder="เช่น แคลคูลัส" maxlength="40" />
+        <span class="form-error-msg" id="errSubName"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รหัสวิชา</label>
+        <input class="form-input" type="text" id="subCode" placeholder="เช่น MTH101" maxlength="12" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">ไอคอน (Emoji)</label>
+        <input class="form-input" type="text" id="subIcon" placeholder="🔢" maxlength="4" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">หน่วยกิต</label>
+        <input class="form-input" type="number" id="subCredit" placeholder="3" min="1" max="9" />
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">ระดับความยาก</label>
+        <select class="form-select" id="subDiff">
+          <option value="easy">😊 ง่าย</option>
+          <option value="medium" selected>😐 ปานกลาง</option>
+          <option value="hard">😰 ยาก</option>
+          <option value="vhard">💀 ยากมาก</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">วันสอบ</label>
+        <input class="form-input" type="date" id="subExamDate" />
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-sm); margin-top:var(--sp-lg); padding-top:var(--sp-md); border-top:1px solid var(--glass-border)">
+      <button class="btn btn-secondary" onclick="closeSubjectModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveSubject()">💾 บันทึกวิชา</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🗑️ ยืนยันการลบ</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <p style="color:var(--text-secondary); font-size:0.88rem; font-weight:300; line-height:1.6; margin-bottom:var(--sp-lg)">
+      คุณต้องการลบโปรเจกต์ <strong id="deleteProjectName" style="color:var(--text-primary)"></strong> ใช่หรือไม่?
+      การดำเนินการนี้ไม่สามารถยกเลิกได้
+    </p>
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-sm)">
+      <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" id="confirmDeleteBtn"
+        style="background:var(--grad-amber)!important;box-shadow:none!important">
+        ลบโปรเจกต์
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ── -->
+<div id="toast-container"></div>
+
+<!-- ── APP WRAPPER ── -->
+<div class="app-wrapper">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-logo">
+      <div class="logo-mark">⚡</div>
+      <span style="font-size:1rem; font-weight:700">Portfolio<span style="color:var(--accent-cyan)">.</span>io</span>
+    </div>
+    <div class="topbar-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="globalSearch" placeholder="ค้นหาโปรเจกต์, ทักษะ..." autocomplete="off" />
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" style="padding:7px 16px; font-size:0.8rem"
+        onclick="navigateTo('add')">+ เพิ่มโปรเจกต์</button>
+      <div class="avatar" title="ผู้ใช้งาน">KH</div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">เมนูหลัก</div>
+    <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" data-page="projects" onclick="navigateTo('projects')">
+      <span class="nav-icon">📁</span> โปรเจกต์
+      <span class="nav-badge" id="projectCountBadge">0</span>
+    </div>
+    <div class="nav-item" data-page="skills" onclick="navigateTo('skills')">
+      <span class="nav-icon">🎯</span> ทักษะ
+    </div>
+    <div class="nav-item" data-page="add" onclick="navigateTo('add')">
+      <span class="nav-icon">➕</span> เพิ่มโปรเจกต์
+    </div>
+    <div class="nav-item" data-page="study" onclick="navigateTo('study')">
+      <span class="nav-icon">📖</span> ตารางอ่านหนังสือสอบ
+    </div>
+    <div class="nav-item" data-page="timer" onclick="navigateTo('timer')">
+      <span class="nav-icon">⏱️</span> จับเวลาอ่านหนังสือ
+    </div>
+
+    <div class="sidebar-section-label">ระบบ</div>
+    <div class="nav-item" onclick="clearAllData()">
+      <span class="nav-icon">🗑️</span> ล้างข้อมูลทั้งหมด
+    </div>
+    <div class="nav-item" onclick="exportData()">
+      <span class="nav-icon">📤</span> ส่งออกข้อมูล
+    </div>
+
+    <!-- Storage indicator -->
+    <div style="padding: var(--sp-lg); margin-top: auto;">
+      <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px">
+        Local Storage
+      </div>
+      <div style="height:4px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden">
+        <div id="storageBar" style="height:100%; width:0%; background:var(--grad-cyan); border-radius:99px; transition:width 0.5s ease"></div>
+      </div>
+      <div style="font-size:0.7rem; color:var(--text-muted); margin-top:4px; font-family:var(--font-mono)" id="storageLabel">0 KB / 5 MB</div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- ===== PAGE: DASHBOARD ===== -->
+    <section class="page-section active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>ยินดีต้อนรับ! นี่คือภาพรวมของผลงานและทักษะทั้งหมด</p>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="glass-card stat-card">
+          <div class="stat-card-top">
+            <div class="stat-icon cyan">🏆</div>
+            <span class="stat-change up" id="statCertChange">+2</span>
+          </div>
+          <div class="stat-value" id="statCert">0</div>
+          <div class="stat-label">เกียรติบัตรทั้งหมด</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="barCert" style="background:var(--grad-cyan); width:0%"></div></div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-card-top">
+            <div class="stat-icon violet">✅</div>
+            <span class="stat-change up" id="statDoneChange">+1</span>
+          </div>
+          <div class="stat-value" id="statDone">0</div>
+          <div class="stat-label">โปรเจกต์ที่เสร็จแล้ว</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="barDone" style="background:var(--grad-violet); width:0%"></div></div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-card-top">
+            <div class="stat-icon green">🚀</div>
+            <span class="stat-change up">+3</span>
+          </div>
+          <div class="stat-value" id="statSkill">12</div>
+          <div class="stat-label">ทักษะที่เชี่ยวชาญ</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="background:var(--grad-green); width:75%"></div></div>
+        </div>
+        <div class="glass-card stat-card">
+          <div class="stat-card-top">
+            <div class="stat-icon amber">📈</div>
+            <span class="stat-change down" id="statActiveChange">0</span>
+          </div>
+          <div class="stat-value" id="statActive">0</div>
+          <div class="stat-label">โปรเจกต์ Active</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="barActive" style="background:var(--grad-amber); width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Recent Projects -->
+      <div class="section-toolbar">
+        <span class="section-title">โปรเจกต์ล่าสุด</span>
+        <button class="btn btn-ghost" onclick="navigateTo('projects')" style="font-size:0.8rem">ดูทั้งหมด →</button>
+      </div>
+      <div class="projects-grid" id="recentProjects"></div>
+    </section>
+
+    <!-- ===== PAGE: PROJECTS ===== -->
+    <section class="page-section" id="page-projects">
+      <div class="page-header">
+        <h1>โปรเจกต์ทั้งหมด</h1>
+        <p>จัดการและค้นหาโปรเจกต์ของคุณ</p>
+      </div>
+
+      <div class="section-toolbar">
+        <div class="filter-tabs" id="filterTabs">
+          <button class="filter-tab active" data-cat="all" onclick="filterProjects('all', this)">ทั้งหมด</button>
+          <button class="filter-tab" data-cat="tech"   onclick="filterProjects('tech', this)">💻 Tech</button>
+          <button class="filter-tab" data-cat="design" onclick="filterProjects('design', this)">🎨 Design</button>
+          <button class="filter-tab" data-cat="data"   onclick="filterProjects('data', this)">📊 Data</button>
+          <button class="filter-tab" data-cat="mobile" onclick="filterProjects('mobile', this)">📱 Mobile</button>
+          <button class="filter-tab" data-cat="ai"     onclick="filterProjects('ai', this)">🤖 AI</button>
+        </div>
+        <button class="icon-btn active" id="btnGrid" onclick="setView('grid')" title="Grid View">⊞</button>
+        <button class="icon-btn" id="btnList" onclick="setView('list')" title="List View">☰</button>
+      </div>
+
+      <div class="projects-grid" id="allProjects"></div>
+    </section>
+
+    <!-- ===== PAGE: SKILLS ===== -->
+    <section class="page-section" id="page-skills">
+      <div class="page-header">
+        <h1>ทักษะ & ความเชี่ยวชาญ</h1>
+        <p>ภาพรวมทักษะทางเทคนิคและการออกแบบ</p>
+      </div>
+
+      <div class="section-toolbar" style="margin-bottom:var(--sp-md)">
+        <span class="section-title">ทักษะทั้งหมด</span>
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterSkills('all', this)">ทั้งหมด</button>
+          <button class="filter-tab" onclick="filterSkills('frontend', this)">Frontend</button>
+          <button class="filter-tab" onclick="filterSkills('backend', this)">Backend</button>
+          <button class="filter-tab" onclick="filterSkills('design', this)">Design</button>
+          <button class="filter-tab" onclick="filterSkills('devops', this)">DevOps</button>
+        </div>
+      </div>
+
+      <div class="skills-section">
+        <div class="skills-table-wrap">
+          <table id="skillsTable">
+            <thead>
+              <tr>
+                <th onclick="sortSkills('name')">ทักษะ <span class="sort-icon">↕</span></th>
+                <th onclick="sortSkills('category')">หมวดหมู่ <span class="sort-icon">↕</span></th>
+                <th>ระดับความสามารถ</th>
+                <th onclick="sortSkills('level')">Level <span class="sort-icon">↕</span></th>
+                <th onclick="sortSkills('years')">ประสบการณ์ <span class="sort-icon">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="skillsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: ADD PROJECT ===== -->
+    <section class="page-section" id="page-add">
+      <div class="page-header">
+        <h1>เพิ่มโปรเจกต์ใหม่</h1>
+        <p>กรอกข้อมูลโปรเจกต์ให้ครบถ้วนก่อนบันทึก</p>
+      </div>
+
+      <div class="form-section">
+        <div class="glass-card form-card">
+          <div class="form-title">
+            <span>📝</span> รายละเอียดโปรเจกต์
+          </div>
+          <form id="projectForm" novalidate>
+            <div class="form-grid">
+
+              <div class="form-group">
+                <label class="form-label" for="fieldName">ชื่อโปรเจกต์ <span style="color:var(--danger)">*</span></label>
+                <input class="form-input" type="text" id="fieldName" placeholder="เช่น E-Commerce Platform" maxlength="60" />
+                <span class="form-error-msg" id="errName"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="fieldCategory">หมวดหมู่ <span style="color:var(--danger)">*</span></label>
+                <select class="form-select" id="fieldCategory">
+                  <option value="">— เลือกหมวดหมู่ —</option>
+                  <option value="tech">💻 Technology</option>
+                  <option value="design">🎨 Design</option>
+                  <option value="data">📊 Data Science</option>
+                  <option value="mobile">📱 Mobile App</option>
+                  <option value="ai">🤖 AI / ML</option>
+                </select>
+                <span class="form-error-msg" id="errCategory"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="fieldStatus">สถานะ</label>
+                <select class="form-select" id="fieldStatus">
+                  <option value="active">🔵 กำลังทำ</option>
+                  <option value="done">🟢 เสร็จแล้ว</option>
+                  <option value="paused">🟡 หยุดพัก</option>
+                  <option value="planned">⚪ วางแผน</option>
+                </select>
+                <span class="form-error-msg"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="fieldProgress">ความคืบหน้า (%) <span style="color:var(--danger)">*</span></label>
+                <input class="form-input" type="number" id="fieldProgress" placeholder="0 – 100" min="0" max="100" />
+                <span class="form-error-msg" id="errProgress"></span>
+              </div>
+
+              <div class="form-group full">
+                <label class="form-label" for="fieldDesc">คำอธิบาย <span style="color:var(--danger)">*</span></label>
+                <textarea class="form-textarea" id="fieldDesc" placeholder="อธิบายโปรเจกต์โดยย่อ..." maxlength="200"></textarea>
+                <span class="form-error-msg" id="errDesc"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="fieldEmoji">ไอคอน (Emoji)</label>
+                <input class="form-input" type="text" id="fieldEmoji" placeholder="เช่น 🛒 🎮 📦" maxlength="4" />
+                <span class="form-error-msg"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="fieldDate">วันที่เริ่ม</label>
+                <input class="form-input" type="date" id="fieldDate" />
+                <span class="form-error-msg"></span>
+              </div>
+
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" onclick="resetForm()">↺ ล้างฟอร์ม</button>
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <span class="spinner"></span>
+                <span class="btn-text">💾 บันทึกโปรเจกต์</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: STUDY SCHEDULE ===== -->
+    <section class="page-section" id="page-study">
+      <div class="page-header">
+        <h1>📖 ตารางอ่านหนังสือสอบ</h1>
+        <p>วางแผนการอ่านหนังสือ ติดตามความคืบหน้า และนับถอยหลังวันสอบ</p>
+      </div>
+
+      <!-- Exam Countdown Banner -->
+      <div class="exam-banner" id="examBanner">
+        <div class="exam-banner-left">
+          <div class="exam-banner-icon">🎓</div>
+          <div>
+            <div class="exam-banner-title" id="examBannerTitle">กำหนดวันสอบของคุณ</div>
+            <div class="exam-banner-sub" id="examBannerSub">ตั้งวันสอบเพื่อเริ่มนับถอยหลัง</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--sp-md); flex-wrap:wrap;">
+          <div class="countdown-boxes" id="countdownBoxes">
+            <div class="countdown-box"><span class="countdown-num" id="cdDays">—</span><span class="countdown-unit">วัน</span></div>
+            <div class="countdown-box"><span class="countdown-num" id="cdHours">—</span><span class="countdown-unit">ชม.</span></div>
+            <div class="countdown-box"><span class="countdown-num" id="cdMins">—</span><span class="countdown-unit">นาที</span></div>
+            <div class="countdown-box"><span class="countdown-num" id="cdSecs">—</span><span class="countdown-unit">วินาที</span></div>
+          </div>
+          <div class="exam-date-form">
+            <span class="exam-date-label">📅 วันสอบ:</span>
+            <input class="form-input" type="datetime-local" id="examDateInput"
+              style="padding:6px 10px; font-size:0.8rem; width:auto;" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Study Stats -->
+      <div class="study-stats-row">
+        <div class="glass-card study-stat">
+          <div class="study-stat-num" id="ssSubjects">0</div>
+          <div class="study-stat-label">วิชาทั้งหมด</div>
+        </div>
+        <div class="glass-card study-stat">
+          <div class="study-stat-num" id="ssSessions">0</div>
+          <div class="study-stat-label">เซสชันทั้งหมด</div>
+        </div>
+        <div class="glass-card study-stat">
+          <div class="study-stat-num" id="ssDone">0</div>
+          <div class="study-stat-label">เซสชันเสร็จแล้ว</div>
+        </div>
+        <div class="glass-card study-stat">
+          <div class="study-stat-num" id="ssHours">0h</div>
+          <div class="study-stat-label">ชั่วโมงที่วางแผน</div>
+        </div>
+      </div>
+
+      <!-- Subjects Section -->
+      <div class="section-toolbar">
+        <span class="section-title">📚 รายวิชา</span>
+        <button class="btn btn-primary" style="padding:7px 14px; font-size:0.8rem"
+          onclick="openAddSubjectModal()">+ เพิ่มวิชา</button>
+      </div>
+      <div class="subjects-grid" id="subjectsGrid"></div>
+
+      <!-- Add Session Panel -->
+      <div class="section-toolbar">
+        <span class="section-title">🗓️ เพิ่มแผนการอ่านในตาราง</span>
+      </div>
+      <div class="glass-card add-session-panel">
+        <div class="panel-row">
+          <div class="form-group">
+            <label class="form-label">วิชา *</label>
+            <select class="form-select" id="ssSubjectSel"><option value="">— เลือกวิชา —</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">วัน *</label>
+            <select class="form-select" id="ssDaySel">
+              <option value="0">จันทร์</option><option value="1">อังคาร</option>
+              <option value="2">พุธ</option><option value="3">พฤหัส</option>
+              <option value="4">ศุกร์</option><option value="5">เสาร์</option>
+              <option value="6">อาทิตย์</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ช่วงเวลา *</label>
+            <select class="form-select" id="ssSlotSel">
+              <option value="0">06:00 – 08:00</option>
+              <option value="1">08:00 – 10:00</option>
+              <option value="2">10:00 – 12:00</option>
+              <option value="3">13:00 – 15:00</option>
+              <option value="4">15:00 – 17:00</option>
+              <option value="5">18:00 – 20:00</option>
+              <option value="6">20:00 – 22:00</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">หัวข้อ</label>
+            <input class="form-input" type="text" id="ssTopicInput" placeholder="เช่น บทที่ 1-3" maxlength="30" />
+          </div>
+          <button class="btn btn-primary" onclick="addStudySession()">
+            <span class="btn-text">+ เพิ่ม</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Weekly Table -->
+      <div class="section-toolbar">
+        <span class="section-title">📅 ตารางรายสัปดาห์</span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <span style="font-size:0.75rem; color:var(--text-muted)">คลิกที่เซสชันเพื่อ mark เสร็จ</span>
+          <button class="btn btn-ghost" style="font-size:0.75rem; padding:5px 12px"
+            onclick="clearWeekSessions()">🗑 ล้างตาราง</button>
+        </div>
+      </div>
+      <div class="schedule-table-wrap">
+        <table class="schedule-table" id="scheduleTable"></table>
+      </div>
+
+    </section>
+
+    <!-- ===== PAGE: STUDY TIMER ===== -->
+    <section class="page-section" id="page-timer">
+      <div class="page-header">
+        <h1>⏱️ จับเวลาอ่านหนังสือ</h1>
+        <p>Pomodoro Timer · ระบบ XP · สถิติการอ่าน · สำหรับ TCAS / Entrance</p>
+      </div>
+
+      <!-- XP / Streak bar -->
+      <div class="timer-xp-bar">
+        <div class="t-streak-badge">🔥 <span id="tStreakNum">0</span> วันติด</div>
+        <div class="t-lv-badge">
+          <div class="t-lv-num" id="tLvNum">1</div>
+          <div class="t-lv-label">Level</div>
+        </div>
+        <div class="t-xp-wrap">
+          <div class="t-xp-top">
+            <span id="tLvTitle">นักเรียนมือใหม่</span>
+            <span id="tXpText">0 / 300 XP</span>
+          </div>
+          <div class="t-xp-track"><div class="t-xp-fill" id="tXpFill" style="width:0%"></div></div>
+        </div>
+        <div class="t-date-chip" id="tDateChip"></div>
+      </div>
+
+      <div class="timer-page-grid">
+
+        <!-- ── LEFT ── -->
+        <div class="timer-left-col">
+
+          <!-- Subject picker -->
+          <div class="t-card">
+            <div class="t-card-body">
+              <div class="t-card-label">📚 เลือกวิชาที่จะอ่าน</div>
+              <div class="t-tcas-row">วิชาหลัก TCAS / ONET</div>
+              <div class="t-tcas-chips" id="tTcasChips"></div>
+              <div style="height:1px;background:var(--glass-border);margin:10px 0"></div>
+              <div class="t-subj-pills" id="tSubjPills"></div>
+              <div class="t-add-row">
+                <input class="form-input t-emoji-in" type="text" id="tNewEmoji" placeholder="📖" maxlength="3" style="width:42px;text-align:center;flex-shrink:0;" />
+                <input class="form-input" type="text" id="tNewSubject" placeholder="เพิ่มวิชาเอง..." maxlength="20" style="flex:1;" />
+                <div class="t-color-dots" id="tColorDots"></div>
+                <button class="btn btn-primary" style="padding:8px 14px;font-size:0.82rem;flex-shrink:0" onclick="tAddSubject()">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timer clock -->
+          <div class="t-card t-timer-card">
+            <div class="t-subj-cur-label" id="tSubLabel">ยังไม่ได้เลือกวิชา</div>
+            <div class="t-subj-cur-name" id="tSubName" style="color:var(--text-muted)">— เลือกวิชาด้านบนก่อน —</div>
+
+            <div style="display:flex;justify-content:center">
+              <div class="t-mode-tabs">
+                <button class="t-mode-tab active" id="tTabFocus"  onclick="tSetMode('focus')">🎯 โฟกัส</button>
+                <button class="t-mode-tab"         id="tTabShort"  onclick="tSetMode('short')">☕ พักสั้น</button>
+                <button class="t-mode-tab"         id="tTabLong"   onclick="tSetMode('long')">🌿 พักยาว</button>
+                <button class="t-mode-tab"         id="tTabCustom" onclick="tSetMode('custom')">⚙️ เอง</button>
+              </div>
+            </div>
+
+            <div class="t-clock-wrap" id="tClockWrap">
+              <svg class="t-clock-svg" viewBox="0 0 200 200">
+                <circle class="t-ring-bg" cx="100" cy="100" r="88"/>
+                <circle class="t-ring-track" id="tRingTrack" cx="100" cy="100" r="88"
+                  stroke-dasharray="553" stroke-dashoffset="0"/>
+              </svg>
+              <div class="t-clock-center">
+                <div class="t-clock-time" id="tClockTime">25:00</div>
+                <div class="t-clock-mode" id="tClockMode">FOCUS TIME</div>
+              </div>
+            </div>
+
+            <div class="t-pom-row">
+              <div class="t-pom-dot" id="tPd0"></div><div class="t-pom-dot" id="tPd1"></div>
+              <div class="t-pom-dot" id="tPd2"></div><div class="t-pom-dot" id="tPd3"></div>
+              <span class="t-pom-lbl" id="tPomLbl">0 รอบรวม</span>
+            </div>
+
+            <div class="t-controls">
+              <button class="t-ctrl-btn" onclick="tReset()" title="รีเซ็ต">↺</button>
+              <button class="t-play-btn" id="tPlayBtn" onclick="tToggle()">▶</button>
+              <button class="t-ctrl-btn" onclick="tSkip()" title="ข้ามรอบ">⏭</button>
+            </div>
+
+            <div class="t-custom-row" id="tCustomRow" style="display:none">
+              <span>กำหนดเวลา:</span>
+              <input class="t-num-in" type="number" id="tCustomMin" value="45" min="1" max="180" />
+              <span>นาที</span>
+              <button class="btn btn-ghost" style="padding:5px 10px;font-size:0.72rem" onclick="tApplyCustom()">ตั้ง</button>
+            </div>
+
+            <div class="t-settings-row">
+              <span>🍅 <input class="t-num-in" type="number" id="tSetFocus" value="25" min="1" max="90" onchange="tOnSettingChange()" style="width:44px"/> นาที</span>
+              <span>☕ <input class="t-num-in" type="number" id="tSetShort" value="5"  min="1" max="30" onchange="tOnSettingChange()" style="width:44px"/> นาที</span>
+              <span>🌿 <input class="t-num-in" type="number" id="tSetLong"  value="15" min="5" max="60" onchange="tOnSettingChange()" style="width:44px"/> นาที</span>
+            </div>
+          </div>
+
+          <!-- Session log -->
+          <div class="t-card">
+            <div class="t-card-body">
+              <div class="t-card-label" style="justify-content:space-between;flex-wrap:wrap">
+                <span style="display:flex;align-items:center;gap:6px">📋 บันทึกเซสชัน</span>
+                <button class="btn btn-ghost" style="padding:5px 10px;font-size:0.74rem;margin-left:auto" onclick="tClearLog()">🗑 ล้าง</button>
+              </div>
+              <div class="t-log-list" id="tLogList">
+                <div class="t-empty-log"><div class="big">📚</div><p>ยังไม่มีเซสชัน<br>เลือกวิชาแล้วกด ▶ เพื่อเริ่ม!</p></div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /timer-left-col -->
+
+        <!-- ── RIGHT ── -->
+        <div class="timer-right-col">
+
+          <!-- Today stats -->
+          <div class="t-card">
+            <div class="t-card-body">
+              <div class="t-card-label">📊 สถิติวันนี้</div>
+              <div class="t-stats-grid">
+                <div class="t-stat-box"><div class="t-stat-num" id="tStatDay">0</div><div class="t-stat-label">นาทีวันนี้</div></div>
+                <div class="t-stat-box"><div class="t-stat-num" id="tStatSess">0</div><div class="t-stat-label">เซสชัน</div></div>
+                <div class="t-stat-box"><div class="t-stat-num" id="tStatHr">0h</div><div class="t-stat-label">ชั่วโมงรวม</div></div>
+                <div class="t-stat-box"><div class="t-stat-num" id="tStatXP">0</div><div class="t-stat-label">XP รวม</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily goal -->
+          <div class="t-card">
+            <div class="t-card-body">
+              <div class="t-card-label">🎯 เป้าหมายวันนี้</div>
+              <div class="t-goal-wrap">
+                <div class="t-goal-svg-ww">
+                  <svg class="t-goal-svg" viewBox="0 0 76 76">
+                    <circle class="t-goal-bg" cx="38" cy="38" r="30"/>
+                    <circle class="t-goal-ring" id="tGoalRing" cx="38" cy="38" r="30"
+                      stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+                  </svg>
+                  <div class="t-goal-center"><div class="t-goal-pct" id="tGoalPct">0%</div></div>
+                </div>
+                <div class="t-goal-info">
+                  <div class="t-goal-title">📖 อ่านหนังสือวันนี้</div>
+                  <div class="t-goal-sub" id="tGoalSub">0 / 120 นาที</div>
+                  <div class="t-goal-set">
+                    <span>เป้า:</span>
+                    <input class="t-num-in" type="number" id="tGoalInput" value="120" min="30" max="600" onchange="tUpdateGoalFromInput()" />
+                    <span>นาที</span>
+                  </div>
+                </div>
+              </div>
+              <div class="t-motiv" id="tMotiv">💪 เริ่มต้นวันใหม่! ทุกนาทีคือก้าวสู่มหาวิทยาลัยในฝัน 🎓</div>
+            </div>
+          </div>
+
+          <!-- Breakdown -->
+          <div class="t-card">
+            <div class="t-card-body">
+              <div class="t-card-label">🏆 เวลาต่อวิชา</div>
+              <div class="t-breakdown-list" id="tBreakdown">
+                <div style="color:var(--text-muted);font-size:0.78rem;text-align:center;padding:16px 0">ยังไม่มีข้อมูล</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Achievements -->
+          <div class="t-card">
+            <div class="t-card-body">
+              <div class="t-card-label">🏅 ความสำเร็จ</div>
+              <div class="t-ach-grid" id="tAchGrid"></div>
+            </div>
+          </div>
+
+        </div><!-- /timer-right-col -->
+      </div><!-- /timer-page-grid -->
+    </section>
+
+  </main><!-- /main-content -->
+</div><!-- /app-wrapper -->
+
+
+<!-- ============================================================
+     JAVASCRIPT — Clean Code with Comments
+     ============================================================ -->
+<script>
+'use strict';
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION A: DATA LAYER — Default & LocalStorage
+   ────────────────────────────────────────────────────────────── */
+
+/** Default project seed data */
+const DEFAULT_PROJECTS = [
+  { id: 1, name: 'E-Commerce Platform', category: 'tech', status: 'done',
+    desc: 'ระบบซื้อขายออนไลน์ครบวงจรพร้อม Payment Gateway และระบบจัดการสินค้า',
+    progress: 100, emoji: '🛒', date: '2024-01-15' },
+  { id: 2, name: 'AI Chat Assistant', category: 'ai', status: 'active',
+    desc: 'แชทบอทที่ใช้ LLM สำหรับตอบคำถามในองค์กร ลด Workload ทีม Support 40%',
+    progress: 65, emoji: '🤖', date: '2024-03-01' },
+  { id: 3, name: 'Design System v2', category: 'design', status: 'done',
+    desc: 'Component library กว่า 120 ชิ้น ด้วย Figma Tokens + Storybook',
+    progress: 100, emoji: '🎨', date: '2024-02-10' },
+  { id: 4, name: 'Data Pipeline', category: 'data', status: 'active',
+    desc: 'ETL pipeline ประมวลผลข้อมูลลูกค้ากว่า 5M records ต่อวันด้วย Apache Spark',
+    progress: 45, emoji: '📊', date: '2024-04-05' },
+  { id: 5, name: 'Mobile Banking App', category: 'mobile', status: 'paused',
+    desc: 'แอปพลิเคชันธนาคารบน iOS/Android รองรับ Biometric Authentication',
+    progress: 30, emoji: '📱', date: '2024-02-20' },
+  { id: 6, name: 'Dashboard Analytics', category: 'tech', status: 'planned',
+    desc: 'Real-time analytics dashboard สำหรับผู้บริหาร แสดงข้อมูลเชิงลึกธุรกิจ',
+    progress: 5, emoji: '📈', date: '2024-05-01' },
+];
+
+/** Default skills data */
+const DEFAULT_SKILLS = [
+  { name: 'React / Next.js', category: 'frontend', level: 92, levelName: 'Expert',    years: 4 },
+  { name: 'TypeScript',      category: 'frontend', level: 85, levelName: 'Expert',    years: 3 },
+  { name: 'Vue.js',          category: 'frontend', level: 70, levelName: 'Advanced',  years: 2 },
+  { name: 'Node.js',         category: 'backend',  level: 80, levelName: 'Advanced',  years: 3 },
+  { name: 'Python',          category: 'backend',  level: 75, levelName: 'Advanced',  years: 4 },
+  { name: 'PostgreSQL',      category: 'backend',  level: 68, levelName: 'Mid',       years: 2 },
+  { name: 'Figma',           category: 'design',   level: 90, levelName: 'Expert',    years: 5 },
+  { name: 'UI/UX Design',    category: 'design',   level: 82, levelName: 'Advanced',  years: 4 },
+  { name: 'Docker',          category: 'devops',   level: 60, levelName: 'Mid',       years: 2 },
+  { name: 'AWS / Cloud',     category: 'devops',   level: 55, levelName: 'Mid',       years: 1 },
+  { name: 'TensorFlow',      category: 'backend',  level: 40, levelName: 'Beginner',  years: 1 },
+  { name: 'Tailwind CSS',    category: 'frontend', level: 95, levelName: 'Expert',    years: 3 },
+];
+
+/* ── LocalStorage helpers ── */
+const STORAGE_KEY = 'portfolio_projects';
+
+/** โหลดข้อมูลจาก localStorage หรือใช้ default ถ้ายังไม่มี */
+function loadProjects() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  return raw ? JSON.parse(raw) : [...DEFAULT_PROJECTS];
+}
+
+/** บันทึกข้อมูลลง localStorage */
+function saveProjects(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  updateStorageIndicator();
+}
+
+/** แสดง % ที่ใช้ใน localStorage */
+function updateStorageIndicator() {
+  const used = new Blob([localStorage.getItem(STORAGE_KEY) || '']).size;
+  const maxBytes = 5 * 1024 * 1024; // 5MB
+  const pct = Math.min((used / maxBytes) * 100, 100);
+  const kb = (used / 1024).toFixed(1);
+  document.getElementById('storageBar').style.width = pct + '%';
+  document.getElementById('storageLabel').textContent = `${kb} KB / 5 MB`;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION B: APP STATE
+   ────────────────────────────────────────────────────────────── */
+
+let state = {
+  projects: loadProjects(),     // รายการโปรเจกต์ทั้งหมด
+  skills: [...DEFAULT_SKILLS],  // ทักษะ (ไม่บันทึก localStorage ในตัวอย่างนี้)
+  currentPage: 'dashboard',     // หน้าปัจจุบัน
+  filterCat: 'all',             // filter category ที่เลือก
+  viewMode: 'grid',             // 'grid' | 'list'
+  searchQuery: '',              // คำค้นหาปัจจุบัน
+  skillFilter: 'all',           // filter ทักษะ
+  skillSort: { col: null, dir: 1 },  // sort state สำหรับตาราง
+  deleteTarget: null,           // id โปรเจกต์ที่รอ confirm ลบ
+};
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION C: NAVIGATION — SPA Router
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * เปลี่ยนหน้า — ซ่อนทุก section แล้วแสดงเฉพาะ section ที่เลือก
+ * @param {string} page - ชื่อหน้า: 'dashboard' | 'projects' | 'skills' | 'add'
+ */
+function navigateTo(page) {
+  state.currentPage = page;
+
+  // ซ่อนทุก section
+  document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+  // แสดง section ที่ต้องการ
+  document.getElementById('page-' + page).classList.add('active');
+
+  // อัปเดต active state บน sidebar
+  document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+
+  // ปิด sidebar บน mobile
+  document.getElementById('sidebar').classList.remove('open');
+
+  // render เนื้อหาตามหน้า
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'projects')  renderProjectsPage();
+  if (page === 'skills')    renderSkillsTable(state.skills);
+  if (page === 'study')     renderStudyPage();
+  if (page === 'timer')     tInitPage();
+
+  // Scroll กลับด้านบน
+  document.getElementById('mainContent').scrollTop = 0;
+}
+
+/** Toggle sidebar บน mobile */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION D: DASHBOARD
+   ────────────────────────────────────────────────────────────── */
+
+/** Render stat cards และ recent projects บน Dashboard */
+function renderDashboard() {
+  const projects = state.projects;
+
+  // นับสถิติ
+  const total   = projects.length;
+  const done    = projects.filter(p => p.status === 'done').length;
+  const active  = projects.filter(p => p.status === 'active').length;
+  const certs   = done + Math.floor(done * 0.5); // สมมุติเกียรติบัตร
+
+  // อัปเดต stat card values พร้อม animation counter
+  animateCounter('statCert',   certs);
+  animateCounter('statDone',   done);
+  animateCounter('statActive', active);
+
+  // อัปเดต progress bars
+  document.getElementById('barCert').style.width   = Math.min(certs / 20 * 100, 100) + '%';
+  document.getElementById('barDone').style.width   = total ? (done / total * 100) + '%' : '0%';
+  document.getElementById('barActive').style.width = total ? (active / total * 100) + '%' : '0%';
+
+  // แสดง 3 โปรเจกต์ล่าสุด
+  const recent = [...projects].slice(-3).reverse();
+  renderProjectCards('recentProjects', recent);
+
+  // อัปเดต badge บน sidebar
+  document.getElementById('projectCountBadge').textContent = total;
+}
+
+/**
+ * Animation เลขนับจาก 0 ขึ้นไป
+ * @param {string} id - element id
+ * @param {number} target - ค่าปลายทาง
+ */
+function animateCounter(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const duration = 800;
+  const start = Date.now();
+  const startVal = parseInt(el.textContent) || 0;
+
+  const tick = () => {
+    const elapsed = Date.now() - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    el.textContent = Math.round(startVal + (target - startVal) * eased);
+    if (progress < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION E: PROJECTS — Render, Filter, Search
+   ────────────────────────────────────────────────────────────── */
+
+/** Render หน้า Projects (ใช้ filter + search ปัจจุบัน) */
+function renderProjectsPage() {
+  const filtered = getFilteredProjects();
+  renderProjectCards('allProjects', filtered);
+}
+
+/**
+ * ได้รายการโปรเจกต์ที่ผ่านการกรองแล้ว
+ * @returns {Array} filtered projects
+ */
+function getFilteredProjects() {
+  let list = state.projects;
+
+  // กรองตาม category
+  if (state.filterCat !== 'all') {
+    list = list.filter(p => p.category === state.filterCat);
+  }
+
+  // กรองตาม search query
+  if (state.searchQuery.trim()) {
+    const q = state.searchQuery.toLowerCase();
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.desc.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q)
+    );
+  }
+
+  return list;
+}
+
+/**
+ * Render project cards ลงใน container element
+ * @param {string} containerId - id ของ container
+ * @param {Array} projects - รายการโปรเจกต์ที่จะ render
+ */
+function renderProjectCards(containerId, projects) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (!projects.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <p>ไม่พบโปรเจกต์ที่ตรงกับเงื่อนไข</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = projects.map((p, i) => buildProjectCard(p, i)).join('');
+
+  // ใส่ view mode class (grid/list)
+  if (containerId === 'allProjects') {
+    container.className = state.viewMode === 'list'
+      ? 'projects-grid list-view'
+      : 'projects-grid';
+  }
+}
+
+/**
+ * สร้าง HTML ของ Project Card
+ * @param {Object} p - project object
+ * @param {number} idx - index สำหรับ animation delay
+ * @returns {string} HTML string
+ */
+function buildProjectCard(p, idx) {
+  const colors = { tech:'cyan', design:'violet', data:'green', mobile:'amber', ai:'ai' };
+  const gradients = {
+    tech:   'linear-gradient(135deg,rgba(0,212,255,0.15),rgba(0,100,140,0.08))',
+    design: 'linear-gradient(135deg,rgba(155,109,255,0.15),rgba(80,40,160,0.08))',
+    data:   'linear-gradient(135deg,rgba(0,229,160,0.15),rgba(0,100,70,0.08))',
+    mobile: 'linear-gradient(135deg,rgba(255,181,71,0.15),rgba(180,100,0,0.08))',
+    ai:     'linear-gradient(135deg,rgba(255,107,138,0.15),rgba(160,40,80,0.08))',
+  };
+  const statusLabels = { done:'เสร็จแล้ว', active:'กำลังทำ', paused:'หยุดพัก', planned:'วางแผน' };
+  const barColors = {
+    tech: 'var(--grad-cyan)', design: 'var(--grad-violet)',
+    data: 'var(--grad-green)', mobile: 'var(--grad-amber)',
+    ai: 'linear-gradient(135deg,var(--accent-rose),#cc3355)',
+  };
+
+  const delay = Math.min(idx * 0.05, 0.4);
+
+  return `
+  <div class="glass-card project-card" style="animation-delay:${delay}s; background:${gradients[p.category] || ''}">
+    <div class="project-card-header">
+      <div class="project-thumb" style="background:${gradients[p.category]}">${p.emoji || '📁'}</div>
+      <div class="status-dot ${p.status}" title="${statusLabels[p.status] || p.status}"></div>
+    </div>
+    <div class="project-name">${escapeHTML(p.name)}</div>
+    <div class="project-desc">${escapeHTML(p.desc)}</div>
+    <div class="project-tags">
+      <span class="tag ${colors[p.category] || 'tech'}">${p.category.toUpperCase()}</span>
+      <span class="tag" style="background:rgba(255,255,255,0.05); color:var(--text-muted); border-color:var(--glass-border)">
+        ${statusLabels[p.status] || p.status}
+      </span>
+    </div>
+    <div class="project-footer">
+      <span class="project-meta">${p.date || '—'}</span>
+      <div class="project-progress-wrap">
+        <div class="project-progress-bar">
+          <div class="project-progress-fill" style="width:${p.progress}%; background:${barColors[p.category] || 'var(--grad-cyan)'}"></div>
+        </div>
+        <div class="project-progress-pct">${p.progress}%</div>
+      </div>
+      <button class="btn-delete" onclick="confirmDelete(${p.id}, '${escapeHTML(p.name)}')" title="ลบ">🗑</button>
+    </div>
+  </div>`;
+}
+
+/**
+ * กรอง projects ตาม category
+ * @param {string} cat - category key
+ * @param {HTMLElement} btn - ปุ่มที่ถูกกด
+ */
+function filterProjects(cat, btn) {
+  state.filterCat = cat;
+
+  // อัปเดต active tab
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  renderProjectsPage();
+}
+
+/**
+ * เปลี่ยน View Mode ระหว่าง grid และ list
+ * @param {string} mode - 'grid' | 'list'
+ */
+function setView(mode) {
+  state.viewMode = mode;
+  document.getElementById('btnGrid').classList.toggle('active', mode === 'grid');
+  document.getElementById('btnList').classList.toggle('active', mode === 'list');
+  renderProjectsPage();
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION F: SEARCH
+   ────────────────────────────────────────────────────────────── */
+
+/** Setup global search — real-time filter */
+function initSearch() {
+  const input = document.getElementById('globalSearch');
+
+  // debounce เพื่อไม่ให้ render บ่อยเกินไป
+  let debounceTimer;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      state.searchQuery = input.value;
+
+      // ถ้าอยู่หน้า projects ให้ filter ทันที
+      if (state.currentPage === 'projects') renderProjectsPage();
+      // ถ้าอยู่หน้า dashboard ก็ filter recent
+      if (state.currentPage === 'dashboard') {
+        const q = state.searchQuery.toLowerCase();
+        const filtered = q
+          ? state.projects.filter(p => p.name.toLowerCase().includes(q)).slice(-3).reverse()
+          : [...state.projects].slice(-3).reverse();
+        renderProjectCards('recentProjects', filtered);
+      }
+    }, 200);
+  });
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION G: SKILLS TABLE
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * Render ตาราง skills
+ * @param {Array} skills - รายการ skills ที่จะแสดง
+ */
+function renderSkillsTable(skills) {
+  const barColors = {
+    frontend: 'var(--grad-cyan)',
+    backend:  'var(--grad-violet)',
+    design:   'var(--grad-green)',
+    devops:   'var(--grad-amber)',
+  };
+
+  const tbody = document.getElementById('skillsBody');
+  tbody.innerHTML = skills.map(s => {
+    const levelClass = s.level >= 90 ? 'level-expert'
+      : s.level >= 70 ? 'level-advanced'
+      : s.level >= 50 ? 'level-mid'
+      : 'level-beginner';
+
+    return `
+    <tr>
+      <td>${escapeHTML(s.name)}</td>
+      <td><span class="tag ${s.category === 'frontend' ? 'tech' : s.category === 'design' ? 'design' : s.category === 'devops' ? 'mobile' : 'data'}">${s.category}</span></td>
+      <td>
+        <div class="skill-level-bar">
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width:${s.level}%; background:${barColors[s.category] || 'var(--grad-cyan)'}"></div>
+          </div>
+          <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); white-space:nowrap">${s.level}%</span>
+        </div>
+      </td>
+      <td><span class="level-badge ${levelClass}">${s.levelName}</span></td>
+      <td style="font-family:var(--font-mono); font-size:0.8rem">${s.years} yr${s.years > 1 ? 's' : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+/**
+ * กรอง skills ตาม category
+ * @param {string} cat - category filter
+ * @param {HTMLElement} btn - ปุ่มที่กด
+ */
+function filterSkills(cat, btn) {
+  state.skillFilter = cat;
+
+  // อัปเดต active tab (เฉพาะใน skills section)
+  const tabs = document.querySelectorAll('#page-skills .filter-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const filtered = cat === 'all'
+    ? state.skills
+    : state.skills.filter(s => s.category === cat);
+
+  renderSkillsTable(filtered);
+}
+
+/**
+ * Sort ตาราง skills ตาม column
+ * @param {string} col - ชื่อ column: 'name' | 'category' | 'level' | 'years'
+ */
+function sortSkills(col) {
+  const s = state.skillSort;
+
+  // toggle direction ถ้า column เดิม, ไม่งั้น ascending
+  s.dir = (s.col === col) ? -s.dir : 1;
+  s.col = col;
+
+  // อัปเดต sort icon
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  event.currentTarget.classList.add('sorted');
+  event.currentTarget.querySelector('.sort-icon').textContent = s.dir === 1 ? '↑' : '↓';
+
+  const sorted = [...state.skills].sort((a, b) => {
+    const va = a[col]; const vb = b[col];
+    if (typeof va === 'string') return va.localeCompare(vb) * s.dir;
+    return (va - vb) * s.dir;
+  });
+
+  const filtered = state.skillFilter === 'all'
+    ? sorted
+    : sorted.filter(sk => sk.category === state.skillFilter);
+
+  renderSkillsTable(filtered);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION H: FORM — Validation & Submit
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * Validate ฟอร์มทั้งหมด
+ * @returns {boolean} true ถ้า valid
+ */
+function validateForm() {
+  let valid = true;
+
+  const rules = [
+    {
+      id: 'fieldName', errId: 'errName',
+      validate: v => v.trim().length >= 3,
+      msg: 'ชื่อโปรเจกต์ต้องมีอย่างน้อย 3 ตัวอักษร'
+    },
+    {
+      id: 'fieldCategory', errId: 'errCategory',
+      validate: v => v !== '',
+      msg: 'กรุณาเลือกหมวดหมู่'
+    },
+    {
+      id: 'fieldProgress', errId: 'errProgress',
+      validate: v => v !== '' && Number(v) >= 0 && Number(v) <= 100,
+      msg: 'ความคืบหน้าต้องอยู่ระหว่าง 0 – 100'
+    },
+    {
+      id: 'fieldDesc', errId: 'errDesc',
+      validate: v => v.trim().length >= 10,
+      msg: 'คำอธิบายต้องมีอย่างน้อย 10 ตัวอักษร'
+    },
+  ];
+
+  rules.forEach(rule => {
+    const el  = document.getElementById(rule.id);
+    const err = document.getElementById(rule.errId);
+    const val = el.value;
+
+    if (rule.validate(val)) {
+      // valid: แสดง success state
+      el.classList.remove('error');
+      el.classList.add('success');
+      if (err) err.textContent = '';
+    } else {
+      // invalid: แสดง error state
+      el.classList.remove('success');
+      el.classList.add('error');
+      if (err) err.textContent = rule.msg;
+      valid = false;
+    }
+  });
+
+  return valid;
+}
+
+/** ล้าง state ของ validation ทั้งหมด */
+function clearValidation() {
+  ['fieldName','fieldCategory','fieldProgress','fieldDesc'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('error', 'success');
+  });
+  ['errName','errCategory','errProgress','errDesc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+}
+
+/** ล้างค่าในฟอร์มทั้งหมด */
+function resetForm() {
+  document.getElementById('projectForm').reset();
+  clearValidation();
+  showToast('ล้างฟอร์มเรียบร้อยแล้ว', 'info');
+}
+
+/** Setup form submit listener */
+function initForm() {
+  document.getElementById('projectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      showToast('กรุณากรอกข้อมูลให้ถูกต้องก่อนบันทึก', 'error');
+      return;
+    }
+
+    // แสดง loading state บนปุ่ม
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    // Simulate async save (e.g., API call) — 600ms delay
+    await new Promise(r => setTimeout(r, 600));
+
+    // สร้าง object โปรเจกต์ใหม่
+    const newProject = {
+      id:       Date.now(),
+      name:     document.getElementById('fieldName').value.trim(),
+      category: document.getElementById('fieldCategory').value,
+      status:   document.getElementById('fieldStatus').value,
+      progress: parseInt(document.getElementById('fieldProgress').value) || 0,
+      desc:     document.getElementById('fieldDesc').value.trim(),
+      emoji:    document.getElementById('fieldEmoji').value.trim() || '📁',
+      date:     document.getElementById('fieldDate').value || new Date().toISOString().split('T')[0],
+    };
+
+    // เพิ่มเข้า state และ save ลง localStorage
+    state.projects.push(newProject);
+    saveProjects(state.projects);
+
+    // reset loading state
+    btn.classList.remove('loading');
+    btn.disabled = false;
+
+    // แจ้งผล
+    showToast(`✅ บันทึก "${newProject.name}" เรียบร้อยแล้ว!`, 'success');
+
+    // ล้างฟอร์ม
+    document.getElementById('projectForm').reset();
+    clearValidation();
+
+    // นำทางไปหน้า Projects และ highlight card ใหม่
+    navigateTo('projects');
+    setTimeout(() => {
+      // เลื่อนไปหาการ์ดที่เพิ่งเพิ่ม
+      const lastCard = document.querySelector('#allProjects .project-card:last-child');
+      if (lastCard) {
+        lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        lastCard.classList.add('highlight-new');
+      }
+    }, 200);
+  });
+
+  // Real-time validation on blur
+  ['fieldName','fieldCategory','fieldProgress','fieldDesc'].forEach(id => {
+    document.getElementById(id).addEventListener('blur', () => {
+      if (document.getElementById(id).value) validateField(id);
+    });
+  });
+}
+
+/**
+ * Validate เฉพาะ field เดียว (ใช้ตอน blur)
+ * @param {string} id - field id
+ */
+function validateField(id) {
+  const singleRules = {
+    fieldName:     { errId:'errName',     fn: v => v.trim().length >= 3, msg:'อย่างน้อย 3 ตัวอักษร' },
+    fieldCategory: { errId:'errCategory', fn: v => v !== '',              msg:'กรุณาเลือกหมวดหมู่' },
+    fieldProgress: { errId:'errProgress', fn: v => v !== '' && +v >= 0 && +v <= 100, msg:'0 – 100' },
+    fieldDesc:     { errId:'errDesc',     fn: v => v.trim().length >= 10, msg:'อย่างน้อย 10 ตัวอักษร' },
+  };
+
+  const rule = singleRules[id];
+  if (!rule) return;
+
+  const el  = document.getElementById(id);
+  const err = document.getElementById(rule.errId);
+  const ok  = rule.fn(el.value);
+
+  el.classList.toggle('error', !ok);
+  el.classList.toggle('success', ok);
+  if (err) err.textContent = ok ? '' : rule.msg;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION I: DELETE — Modal Confirm
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * เปิด modal ยืนยันการลบ
+ * @param {number} id - project id
+ * @param {string} name - ชื่อโปรเจกต์
+ */
+function confirmDelete(id, name) {
+  state.deleteTarget = id;
+  document.getElementById('deleteProjectName').textContent = name;
+  document.getElementById('deleteModal').classList.add('open');
+
+  document.getElementById('confirmDeleteBtn').onclick = () => {
+    deleteProject(id);
+    closeModal();
+  };
+}
+
+/** ปิด modal */
+function closeModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  state.deleteTarget = null;
+}
+
+/**
+ * ลบโปรเจกต์ตาม id
+ * @param {number} id - project id ที่ต้องการลบ
+ */
+function deleteProject(id) {
+  const proj = state.projects.find(p => p.id === id);
+  state.projects = state.projects.filter(p => p.id !== id);
+  saveProjects(state.projects);
+
+  showToast(`ลบ "${proj?.name}" แล้ว`, 'warning');
+
+  // re-render หน้าปัจจุบัน
+  if (state.currentPage === 'dashboard') renderDashboard();
+  else renderProjectsPage();
+}
+
+/** ล้างข้อมูลทั้งหมด */
+function clearAllData() {
+  if (!confirm('ล้างข้อมูลโปรเจกต์ทั้งหมด? การดำเนินการนี้ไม่สามารถยกเลิกได้')) return;
+  state.projects = [];
+  saveProjects([]);
+  showToast('ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว', 'info');
+  navigateTo('dashboard');
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION J: EXPORT DATA
+   ────────────────────────────────────────────────────────────── */
+
+/** Export ข้อมูล projects เป็น JSON file */
+function exportData() {
+  const json = JSON.stringify(state.projects, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `portfolio_projects_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('ส่งออกข้อมูลเรียบร้อยแล้ว 📤', 'success');
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION K: TOAST NOTIFICATION
+   ────────────────────────────────────────────────────────────── */
+
+/** Map type → icon */
+const TOAST_ICONS = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+
+/**
+ * แสดง Toast notification
+ * @param {string} msg  - ข้อความ
+ * @param {string} type - 'success' | 'error' | 'info' | 'warning'
+ * @param {number} dur  - duration ms (default 3000)
+ */
+function showToast(msg, type = 'info', dur = 3200) {
+  const container = document.getElementById('toast-container');
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${TOAST_ICONS[type] || 'ℹ️'}</span>
+    <span class="toast-msg">${msg}</span>`;
+
+  container.appendChild(toast);
+
+  // ลบ toast หลัง dur ms
+  setTimeout(() => {
+    toast.classList.add('removing');
+    setTimeout(() => toast.remove(), 300);
+  }, dur);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION L: UTILITIES
+   ────────────────────────────────────────────────────────────── */
+
+/**
+ * Escape HTML เพื่อป้องกัน XSS
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.appendChild(document.createTextNode(String(str)));
+  return div.innerHTML;
+}
+
+/** ปิด modal เมื่อคลิก overlay */
+document.getElementById('deleteModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+/** ปิด sidebar เมื่อคลิก outside (mobile) */
+document.addEventListener('click', (e) => {
+  const sidebar = document.getElementById('sidebar');
+  const hamburger = document.getElementById('hamburger');
+  if (sidebar.classList.contains('open')
+    && !sidebar.contains(e.target)
+    && !hamburger.contains(e.target)) {
+    sidebar.classList.remove('open');
+  }
+});
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION M: APP BOOTSTRAP
+   ────────────────────────────────────────────────────────────── */
+
+/** เริ่มต้นแอพ */
+function init() {
+  initSearch();   // setup global search
+  initForm();     // setup form validation + submit
+  renderDashboard();        // render หน้าแรก
+  updateStorageIndicator(); // แสดงขนาด localStorage
+
+  // แสดง welcome toast
+  setTimeout(() => showToast('ยินดีต้อนรับสู่ Portfolio Dashboard! 👋', 'info'), 500);
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION N: STUDY SCHEDULE — Data & Storage
+   ────────────────────────────────────────────────────────────── */
+
+const STUDY_KEY    = 'study_subjects';
+const SESSION_KEY  = 'study_sessions';
+const EXAMDATE_KEY = 'study_examdate';
+
+/** โหลด / บันทึก subjects */
+function loadSubjects()  { return JSON.parse(localStorage.getItem(STUDY_KEY)   || '[]'); }
+function saveSubjects(d) { localStorage.setItem(STUDY_KEY, JSON.stringify(d));  updateStorageIndicator(); }
+
+/** โหลด / บันทึก sessions (แถวในตาราง) */
+function loadSessions()  { return JSON.parse(localStorage.getItem(SESSION_KEY)  || '[]'); }
+function saveSessions(d) { localStorage.setItem(SESSION_KEY, JSON.stringify(d)); updateStorageIndicator(); }
+
+/** ป้องกัน undefined ใน studyState */
+let studyState = {
+  subjects: loadSubjects(),
+  sessions: loadSessions(),
+  examDate: localStorage.getItem(EXAMDATE_KEY) || '',
+  countdownTimer: null,
+};
+
+/* ── Time slots & Day labels ── */
+const TIME_SLOTS = [
+  '06:00 – 08:00','08:00 – 10:00','10:00 – 12:00',
+  '13:00 – 15:00','15:00 – 17:00','18:00 – 20:00','20:00 – 22:00',
+];
+const DAYS_TH = ['จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์','อาทิตย์'];
+
+/* ── Difficulty labels ── */
+const DIFF_LABEL = { easy:'😊 ง่าย', medium:'😐 ปานกลาง', hard:'😰 ยาก', vhard:'💀 ยากมาก' };
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION O: STUDY PAGE — Render
+   ────────────────────────────────────────────────────────────── */
+
+/** Render ทุกอย่างในหน้า study */
+function renderStudyPage() {
+  renderSubjectSelect();
+  renderSubjectsGrid();
+  renderScheduleTable();
+  renderStudyStats();
+  initExamCountdown();
+}
+
+/** Render dropdown วิชาใน add-session panel */
+function renderSubjectSelect() {
+  const sel = document.getElementById('ssSubjectSel');
+  const val = sel.value;
+  sel.innerHTML = '<option value="">— เลือกวิชา —</option>' +
+    studyState.subjects.map(s =>
+      `<option value="${s.id}">${s.icon || '📚'} ${escapeHTML(s.name)}</option>`
+    ).join('');
+  sel.value = val; // คงค่าเดิมไว้
+}
+
+/** Render subject cards */
+function renderSubjectsGrid() {
+  const grid = document.getElementById('subjectsGrid');
+  if (!studyState.subjects.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">📚</div>
+      <p>ยังไม่มีวิชา กด "+ เพิ่มวิชา" เพื่อเริ่มต้น</p></div>`;
+    return;
+  }
+
+  const gradients = [
+    'var(--grad-cyan)','var(--grad-violet)','var(--grad-green)',
+    'var(--grad-amber)','linear-gradient(135deg,var(--accent-rose),#cc3355)',
+    'linear-gradient(135deg,#64c8ff,#0066aa)','linear-gradient(135deg,#c89bff,#6622bb)',
+    'linear-gradient(135deg,#64e6b4,#009966)',
+  ];
+
+  grid.innerHTML = studyState.subjects.map((s, i) => {
+    const colorIdx = i % 8;
+    const done = studyState.sessions.filter(ss => ss.subjectId === s.id && ss.done).length;
+    const total = studyState.sessions.filter(ss => ss.subjectId === s.id).length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const diffLabel = DIFF_LABEL[s.difficulty] || '😐';
+
+    return `
+    <div class="glass-card subject-card" style="animation-delay:${i*0.05}s">
+      <div class="subject-header">
+        <span class="subject-icon">${s.icon || '📚'}</span>
+        <span class="subject-credit">${s.credit || '—'} หน่วยกิต</span>
+      </div>
+      <div class="subject-name">${escapeHTML(s.name)}</div>
+      <div class="subject-code">${s.code || ''} · ${diffLabel}</div>
+      ${s.examDate ? `<div style="font-size:0.72rem; color:var(--accent-rose); font-family:var(--font-mono); margin-bottom:4px">🗓 สอบ: ${s.examDate}</div>` : ''}
+      <div class="subject-progress-wrap">
+        <div class="subject-bar">
+          <div class="subject-bar-fill" style="width:${pct}%; background:${gradients[colorIdx]}"></div>
+        </div>
+        <span class="subject-pct">${done}/${total} (${pct}%)</span>
+      </div>
+      <div class="subject-actions">
+        <button class="btn btn-ghost btn-sm" onclick="deleteSubject(${s.id})"
+          style="font-size:0.72rem; color:var(--danger); padding:3px 8px">🗑 ลบ</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/** Render ตารางรายสัปดาห์ */
+function renderScheduleTable() {
+  const table = document.getElementById('scheduleTable');
+  const todayDow = (new Date().getDay() + 6) % 7; // 0=Mon … 6=Sun
+
+  // สร้าง header row
+  let thead = '<thead><tr><th style="width:90px">เวลา</th>';
+  DAYS_TH.forEach((d, i) => {
+    const cls = i === todayDow ? 'day-col today-col' : 'day-col';
+    thead += `<th class="${cls}">${d}</th>`;
+  });
+  thead += '</tr></thead>';
+
+  // สร้าง body rows
+  let tbody = '<tbody>';
+  TIME_SLOTS.forEach((slot, slotIdx) => {
+    tbody += `<tr><td>${slot}</td>`;
+    for (let day = 0; day < 7; day++) {
+      const tdCls = day === todayDow ? 'today-td' : '';
+      // หา sessions ที่ match day + slot นี้
+      const cells = studyState.sessions
+        .filter(ss => ss.day == day && ss.slot == slotIdx)
+        .map(ss => {
+          const sub = studyState.subjects.find(s => s.id === ss.subjectId);
+          if (!sub) return '';
+          const subIdx = studyState.subjects.indexOf(sub);
+          const colorCls = 'sc-' + (subIdx % 8);
+          const doneCls  = ss.done ? 'done-session' : '';
+          return `
+          <div class="session-block ${colorCls} ${doneCls}"
+            onclick="toggleSession(${ss.id})" title="คลิกเพื่อ mark เสร็จ/ยังไม่เสร็จ">
+            <div class="session-name">${escapeHTML(sub.icon || '📚')} ${escapeHTML(sub.name)}</div>
+            ${ss.topic ? `<div class="session-duration">${escapeHTML(ss.topic)}</div>` : ''}
+          </div>`;
+        }).join('');
+
+      tbody += `<td class="${tdCls}">${cells || '<span style="color:var(--text-muted);font-size:0.65rem">—</span>'}</td>`;
+    }
+    tbody += '</tr>';
+  });
+  tbody += '</tbody>';
+
+  table.innerHTML = thead + tbody;
+}
+
+/** Render study stats */
+function renderStudyStats() {
+  const total   = studyState.sessions.length;
+  const done    = studyState.sessions.filter(s => s.done).length;
+  const hours   = Math.round(total * 2); // แต่ละ slot = 2 ชั่วโมง
+
+  document.getElementById('ssSubjects').textContent = studyState.subjects.length;
+  document.getElementById('ssSessions').textContent = total;
+  document.getElementById('ssDone').textContent     = done;
+  document.getElementById('ssHours').textContent    = hours + 'h';
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION P: SUBJECTS — CRUD
+   ────────────────────────────────────────────────────────────── */
+
+function openAddSubjectModal() {
+  document.getElementById('subjectModal').classList.add('open');
+  document.getElementById('subName').focus();
+}
+
+function closeSubjectModal() {
+  document.getElementById('subjectModal').classList.remove('open');
+  // ล้างฟอร์ม
+  ['subName','subCode','subIcon','subCredit','subExamDate'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('subDiff').value = 'medium';
+  document.getElementById('errSubName').textContent = '';
+}
+
+/** บันทึกวิชาใหม่ */
+function saveSubject() {
+  const name = document.getElementById('subName').value.trim();
+  if (!name) {
+    document.getElementById('errSubName').textContent = 'กรุณาใส่ชื่อวิชา';
+    document.getElementById('subName').classList.add('error');
+    return;
+  }
+  document.getElementById('subName').classList.remove('error');
+  document.getElementById('errSubName').textContent = '';
+
+  const subject = {
+    id:         Date.now(),
+    name:       name,
+    code:       document.getElementById('subCode').value.trim(),
+    icon:       document.getElementById('subIcon').value.trim() || '📚',
+    credit:     parseInt(document.getElementById('subCredit').value) || 3,
+    difficulty: document.getElementById('subDiff').value,
+    examDate:   document.getElementById('subExamDate').value,
+  };
+
+  studyState.subjects.push(subject);
+  saveSubjects(studyState.subjects);
+
+  closeSubjectModal();
+  renderSubjectSelect();
+  renderSubjectsGrid();
+  renderStudyStats();
+  showToast(`เพิ่มวิชา "${subject.name}" เรียบร้อย! 📚`, 'success');
+}
+
+/** ลบวิชาและ session ทั้งหมดของวิชานั้น */
+function deleteSubject(id) {
+  const sub = studyState.subjects.find(s => s.id === id);
+  if (!sub || !confirm(`ลบวิชา "${sub.name}" และ session ทั้งหมด?`)) return;
+
+  studyState.subjects = studyState.subjects.filter(s => s.id !== id);
+  studyState.sessions = studyState.sessions.filter(s => s.subjectId !== id);
+
+  saveSubjects(studyState.subjects);
+  saveSessions(studyState.sessions);
+  renderSubjectSelect();
+  renderSubjectsGrid();
+  renderScheduleTable();
+  renderStudyStats();
+  showToast(`ลบวิชา "${sub.name}" แล้ว`, 'warning');
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION Q: SESSIONS — Add / Toggle / Clear
+   ────────────────────────────────────────────────────────────── */
+
+/** เพิ่ม session ลงตาราง */
+function addStudySession() {
+  const subId = parseInt(document.getElementById('ssSubjectSel').value);
+  const day   = parseInt(document.getElementById('ssDaySel').value);
+  const slot  = parseInt(document.getElementById('ssSlotSel').value);
+  const topic = document.getElementById('ssTopicInput').value.trim();
+
+  if (!subId) { showToast('กรุณาเลือกวิชาก่อน', 'error'); return; }
+
+  // ตรวจสอบ duplicate
+  const exists = studyState.sessions.find(s => s.subjectId === subId && s.day === day && s.slot === slot);
+  if (exists) { showToast('มี session นี้อยู่แล้ว', 'warning'); return; }
+
+  const session = { id: Date.now(), subjectId: subId, day, slot, topic, done: false };
+  studyState.sessions.push(session);
+  saveSessions(studyState.sessions);
+
+  const sub = studyState.subjects.find(s => s.id === subId);
+  document.getElementById('ssTopicInput').value = '';
+
+  renderScheduleTable();
+  renderStudyStats();
+  renderSubjectsGrid(); // อัปเดต progress bar
+  showToast(`เพิ่ม "${sub?.name}" วัน${DAYS_TH[day]} ${TIME_SLOTS[slot]} แล้ว ✅`, 'success');
+}
+
+/**
+ * Toggle status done ของ session
+ * @param {number} id - session id
+ */
+function toggleSession(id) {
+  const sess = studyState.sessions.find(s => s.id === id);
+  if (!sess) return;
+  sess.done = !sess.done;
+  saveSessions(studyState.sessions);
+  renderScheduleTable();
+  renderStudyStats();
+  renderSubjectsGrid();
+
+  const sub = studyState.subjects.find(s => s.id === sess.subjectId);
+  showToast(
+    sess.done
+      ? `✅ mark เสร็จ: ${sub?.name} ${TIME_SLOTS[sess.slot]}`
+      : `↩ ยกเลิก mark: ${sub?.name}`,
+    sess.done ? 'success' : 'info'
+  );
+}
+
+/** ล้าง session ทั้งหมดในตาราง */
+function clearWeekSessions() {
+  if (!studyState.sessions.length) { showToast('ไม่มี session ในตาราง', 'info'); return; }
+  if (!confirm('ล้าง session ทั้งหมดในตาราง?')) return;
+  studyState.sessions = [];
+  saveSessions([]);
+  renderScheduleTable();
+  renderStudyStats();
+  renderSubjectsGrid();
+  showToast('ล้างตารางเรียบร้อยแล้ว', 'info');
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION R: EXAM COUNTDOWN
+   ────────────────────────────────────────────────────────────── */
+
+/** Init countdown และ setup listener */
+function initExamCountdown() {
+  const input = document.getElementById('examDateInput');
+  input.value = studyState.examDate;
+
+  if (studyState.examDate) startCountdown(studyState.examDate);
+
+  input.addEventListener('change', () => {
+    studyState.examDate = input.value;
+    localStorage.setItem(EXAMDATE_KEY, input.value);
+    if (studyState.countdownTimer) clearInterval(studyState.countdownTimer);
+    if (input.value) startCountdown(input.value);
+  });
+}
+
+/**
+ * เริ่ม countdown timer ไปยังวันสอบ
+ * @param {string} dateStr - datetime-local string
+ */
+function startCountdown(dateStr) {
+  const target = new Date(dateStr).getTime();
+
+  // อัปเดตชื่อใน banner
+  const dOpts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('examBannerTitle').textContent =
+    '🎓 วันสอบ: ' + new Date(dateStr).toLocaleDateString('th-TH', dOpts);
+
+  const tick = () => {
+    const now  = Date.now();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      document.getElementById('examBannerSub').textContent = '🔔 ถึงเวลาสอบแล้ว! โชคดีนะ!';
+      ['cdDays','cdHours','cdMins','cdSecs'].forEach(id =>
+        document.getElementById(id).textContent = '0');
+      clearInterval(studyState.countdownTimer);
+      return;
+    }
+
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins  = Math.floor((diff % 3600000)  / 60000);
+    const secs  = Math.floor((diff % 60000)    / 1000);
+
+    document.getElementById('cdDays').textContent  = days;
+    document.getElementById('cdHours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cdMins').textContent  = String(mins).padStart(2,'0');
+    document.getElementById('cdSecs').textContent  = String(secs).padStart(2,'0');
+
+    const urgency = days <= 3 ? 'เร่งด่วน! 🔥 ' : days <= 7 ? 'ใกล้มาแล้ว! ⚡ ' : '';
+    document.getElementById('examBannerSub').textContent =
+      `${urgency}เหลือเวลาอีก ${days} วัน ${hours} ชั่วโมง`;
+  };
+
+  tick();
+  studyState.countdownTimer = setInterval(tick, 1000);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION S: STUDY TIMER — Constants
+   ────────────────────────────────────────────────────────────── */
+
+const T_TCAS = [
+  { name:'คณิต',    emoji:'🔢', color:'#a78bfa' },
+  { name:'ภาษาไทย', emoji:'📝', color:'#f472b6' },
+  { name:'อังกฤษ',  emoji:'🌍', color:'#60a5fa' },
+  { name:'ฟิสิกส์', emoji:'⚛️', color:'#22d3ee' },
+  { name:'เคมี',    emoji:'🧪', color:'#34d399' },
+  { name:'ชีวะ',    emoji:'🧬', color:'#4ade80' },
+  { name:'สังคม',   emoji:'🌏', color:'#fb923c' },
+  { name:'PAT1',    emoji:'📐', color:'#fbbf24' },
+  { name:'PAT2',    emoji:'🔬', color:'#818cf8' },
+  { name:'ONET',    emoji:'📋', color:'#38bdf8' },
+  { name:'ก.พ.',    emoji:'📜', color:'#f87171' },
+  { name:'TPAT3',   emoji:'🎨', color:'#e879f9' },
+];
+
+const T_COLORS = ['#a78bfa','#f472b6','#60a5fa','#22d3ee','#34d399','#fbbf24','#fb923c','#f87171','#818cf8'];
+
+const T_CIRC = 2 * Math.PI * 88; // 553
+
+const T_LEVELS = [
+  { lv:1, xp:0,    title:'นักเรียนมือใหม่' },
+  { lv:2, xp:300,  title:'ผู้เริ่มต้น' },
+  { lv:3, xp:700,  title:'นักอ่านตัวยง' },
+  { lv:4, xp:1300, title:'เด็กเรียนดี' },
+  { lv:5, xp:2100, title:'หัวกะทิ' },
+  { lv:6, xp:3200, title:'อัจฉริยะ' },
+  { lv:7, xp:4800, title:'เทพวิชาการ' },
+  { lv:8, xp:7000, title:'ระดับ Entrance' },
+  { lv:9, xp:9999, title:'ติดคณะในฝัน 🎓' },
+];
+
+const T_ACHIEV = [
+  { id:'a_first',   icon:'🌱', name:'เซสชันแรก',  cond: s => s.totalSessions >= 1 },
+  { id:'a_1h',      icon:'⏰', name:'1 ชั่วโมง',   cond: s => s.totalMinutes >= 60 },
+  { id:'a_5h',      icon:'🔥', name:'5 ชั่วโมง',   cond: s => s.totalMinutes >= 300 },
+  { id:'a_10h',     icon:'💎', name:'10 ชั่วโมง',  cond: s => s.totalMinutes >= 600 },
+  { id:'a_50h',     icon:'👑', name:'50 ชั่วโมง',  cond: s => s.totalMinutes >= 3000 },
+  { id:'a_s3',      icon:'🔗', name:'3 วันติด',    cond: s => s.streak >= 3 },
+  { id:'a_s7',      icon:'⚡', name:'1 สัปดาห์',   cond: s => s.streak >= 7 },
+  { id:'a_p10',     icon:'🍅', name:'10 Pomodoro', cond: s => s.totalPom >= 10 },
+  { id:'a_p50',     icon:'🏆', name:'50 Pomodoro', cond: s => s.totalPom >= 50 },
+  { id:'a_lv5',     icon:'🌟', name:'Level 5',     cond: s => s.level >= 5 },
+  { id:'a_lv8',     icon:'🎓', name:'Level 8',     cond: s => s.level >= 8 },
+  { id:'a_subj5',   icon:'📚', name:'ครบ 5 วิชา', cond: s => Object.keys(s.subjMinutes).length >= 5 },
+];
+
+const T_MOTIVATIONS = [
+  '💪 ทุกนาทีที่อ่านคือก้าวสู่มหาวิทยาลัยในฝัน 🎓',
+  '🔥 ความพยายามวันนี้คือความสำเร็จของพรุ่งนี้!',
+  '⭐ คนอื่นอาจเก่งกว่า แต่คุณขยันกว่าได้!',
+  '🚀 Entrance ไม่ใช่ดวง แต่คือผลจากการพยายาม',
+  '📖 หนังสือ 1 หน้า = ก้าว 1 ก้าวสู่อนาคต',
+  '🌟 วันนี้ยากแค่ไหน พรุ่งนี้ก็ภูมิใจเท่านั้น',
+  '💡 ความรู้ที่สะสมวันนี้ ใช้ได้ตลอดชีวิต',
+  '🎯 Focus! มหาวิทยาลัยในฝันรอคุณอยู่!',
+  '🏆 เด็กที่ติดมหาลัยไม่ได้เก่งกว่า แต่ขยันกว่า',
+  '🌈 อ่านหนังสือให้สนุก ความรู้จะติดทนกว่า',
+];
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION T: STUDY TIMER — State
+   ────────────────────────────────────────────────────────────── */
+
+const T_SK = 'studyzone_v3';
+const T_TODAY = new Date().toLocaleDateString('th-TH');
+
+function tLoadState() {
+  const raw = localStorage.getItem(T_SK);
+  const def = {
+    subjects: [], sessions: [],
+    totalMinutes: 0, totalSessions: 0, totalPom: 0, totalXP: 0,
+    level: 1, streak: 0, lastStudyDate: '',
+    dailyGoal: 120, subjMinutes: {}, earned: [],
+    todayMinutes: 0, todayDate: '',
+  };
+  return raw ? { ...def, ...JSON.parse(raw) } : def;
+}
+function tSaveState() { localStorage.setItem(T_SK, JSON.stringify(tSt)); }
+
+let tSt = tLoadState();
+if (tSt.todayDate !== T_TODAY) {
+  tSt.todayMinutes = 0; tSt.todayDate = T_TODAY;
+  const yest = new Date(); yest.setDate(yest.getDate()-1);
+  if (tSt.lastStudyDate !== yest.toLocaleDateString('th-TH') && tSt.lastStudyDate !== T_TODAY) tSt.streak = 0;
+  tSaveState();
+}
+
+let tTimer = {
+  mode: 'focus', running: false,
+  timeLeft: 25*60, totalTime: 25*60,
+  intervalId: null, currentSubj: null,
+  pomCount: 0, customMin: 45, sessionStart: null,
+};
+
+let tPickedColor = T_COLORS[0];
+let tInited = false;
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION U: STUDY TIMER — Init & Render
+   ────────────────────────────────────────────────────────────── */
+
+function tInitPage() {
+  // Date badge
+  document.getElementById('tDateChip').textContent =
+    new Date().toLocaleDateString('th-TH', { weekday:'short', month:'long', day:'numeric' });
+  document.getElementById('tMotiv').textContent =
+    T_MOTIVATIONS[Math.floor(Math.random() * T_MOTIVATIONS.length)];
+  document.getElementById('tGoalInput').value = tSt.dailyGoal;
+
+  tRenderTcasChips();
+  tRenderColorDots();
+  tRenderSubjPills();
+  tRenderAchiev();
+  tRenderBreakdown();
+  tUpdateXP();
+  tUpdateStats();
+  tUpdateGoal();
+  tRenderLog();
+
+  if (!tInited) {
+    tSetMode('focus');
+    document.getElementById('tNewSubject').addEventListener('keydown', e => { if (e.key === 'Enter') tAddSubject(); });
+    tInited = true;
+  }
+}
+
+function tRenderTcasChips() {
+  document.getElementById('tTcasChips').innerHTML = T_TCAS.map(s =>
+    `<div class="t-tcas-chip" onclick='tAddTcas(${JSON.stringify(s)})' title="เพิ่ม ${s.name}">${s.emoji} ${s.name}</div>`
+  ).join('');
+}
+
+function tAddTcas(s) {
+  if (tSt.subjects.find(x => x.name === s.name)) { tSelectSubj(s.name); return; }
+  tSt.subjects.push({ name: s.name, emoji: s.emoji, color: s.color });
+  tSaveState(); tRenderSubjPills(); tSelectSubj(s.name);
+  showToast(`เพิ่ม ${s.emoji} ${s.name} แล้ว!`, 'info');
+}
+
+function tRenderColorDots() {
+  document.getElementById('tColorDots').innerHTML = T_COLORS.map((c, i) =>
+    `<div class="t-color-dot ${i===0?'chosen':''}" style="background:${c}" onclick="tPickColor('${c}',this)"></div>`
+  ).join('');
+}
+
+function tPickColor(c, el) {
+  tPickedColor = c;
+  document.querySelectorAll('.t-color-dot').forEach(d => d.classList.remove('chosen'));
+  el.classList.add('chosen');
+}
+
+function tAddSubject() {
+  const ne = document.getElementById('tNewSubject');
+  const ee = document.getElementById('tNewEmoji');
+  const name = ne.value.trim(), emoji = ee.value.trim() || '📖';
+  if (!name) { showToast('กรุณาใส่ชื่อวิชา', 'info'); ne.focus(); return; }
+  if (tSt.subjects.find(s => s.name === name)) { showToast('มีวิชานี้แล้ว', 'info'); return; }
+  tSt.subjects.push({ name, emoji, color: tPickedColor });
+  tSaveState(); tRenderSubjPills(); tSelectSubj(name);
+  ne.value = ''; ee.value = '';
+  showToast(`เพิ่ม ${emoji} ${name} แล้ว!`, 'success');
+}
+
+function tRenderSubjPills() {
+  const wrap = document.getElementById('tSubjPills');
+  if (!tSt.subjects.length) {
+    wrap.innerHTML = `<span style="font-size:0.75rem;color:var(--text-muted)">เลือกจากวิชา TCAS ด้านบน หรือเพิ่มวิชาเอง</span>`;
+    return;
+  }
+  wrap.innerHTML = tSt.subjects.map(s => {
+    const active = tTimer.currentSubj?.name === s.name;
+    return `<div class="t-subj-pill ${active?'active':''}" onclick="tSelectSubj('${escapeHTML(s.name)}')"
+      ${active ? `style="border-color:${s.color};background:${s.color}20;color:${s.color}"` : ''}>
+      <span>${s.emoji}</span><span>${escapeHTML(s.name)}</span>
+      <span class="t-subj-rm" onclick="event.stopPropagation();tRemoveSubj('${escapeHTML(s.name)}')">✕</span>
+    </div>`;
+  }).join('');
+}
+
+function tSelectSubj(name) {
+  const s = tSt.subjects.find(x => x.name === name);
+  if (!s) return;
+  tTimer.currentSubj = s;
+  tRenderSubjPills();
+  document.getElementById('tSubLabel').textContent = 'กำลังอ่าน:';
+  document.getElementById('tSubName').textContent  = `${s.emoji} ${s.name}`;
+  document.getElementById('tSubName').style.color  = s.color;
+  document.getElementById('tRingTrack').style.stroke = s.color;
+  document.getElementById('tPlayBtn').style.background = `linear-gradient(135deg,${s.color},${tDarken(s.color)})`;
+  showToast(`เลือกวิชา ${s.emoji} ${s.name}`, 'info', 1800);
+}
+
+function tRemoveSubj(name) {
+  if (!confirm(`ลบวิชา "${name}"?`)) return;
+  tSt.subjects = tSt.subjects.filter(s => s.name !== name);
+  if (tTimer.currentSubj?.name === name) {
+    tTimer.currentSubj = null;
+    document.getElementById('tSubLabel').textContent = 'ยังไม่ได้เลือกวิชา';
+    document.getElementById('tSubName').textContent  = '— เลือกวิชาด้านบนก่อน —';
+    document.getElementById('tSubName').style.color  = 'var(--text-muted)';
+    document.getElementById('tRingTrack').style.stroke = '#a78bfa';
+    document.getElementById('tPlayBtn').style.background = '';
+  }
+  tSaveState(); tRenderSubjPills(); tRenderBreakdown();
+}
+
+function tDarken(hex) {
+  const n=parseInt(hex.slice(1),16);
+  return '#'+[((n>>16)&255)-40,((n>>8)&255)-40,(n&255)-40].map(v=>Math.max(0,v).toString(16).padStart(2,'0')).join('');
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION V: STUDY TIMER — Timer Logic
+   ────────────────────────────────────────────────────────────── */
+
+function tGetSecs() {
+  const f=parseInt(document.getElementById('tSetFocus').value)||25;
+  const s=parseInt(document.getElementById('tSetShort').value)||5;
+  const l=parseInt(document.getElementById('tSetLong').value)||15;
+  return {focus:f*60,short:s*60,long:l*60,custom:tTimer.customMin*60}[tTimer.mode]||f*60;
+}
+function tGetLabel() { return {focus:'FOCUS TIME',short:'SHORT BREAK',long:'LONG BREAK',custom:'CUSTOM'}[tTimer.mode]; }
+
+function tSetMode(mode) {
+  tTimer.mode = mode;
+  ['focus','short','long','custom'].forEach(m => {
+    const el = document.getElementById('tTab'+m.charAt(0).toUpperCase()+m.slice(1));
+    if (el) el.classList.toggle('active', m===mode);
+  });
+  document.getElementById('tCustomRow').style.display = mode==='custom'?'flex':'none';
+  const isBreak = mode==='short'||mode==='long';
+  if (isBreak) {
+    document.getElementById('tRingTrack').style.stroke='#34d399';
+    document.getElementById('tPlayBtn').classList.add('brk');
+  } else {
+    document.getElementById('tRingTrack').style.stroke = tTimer.currentSubj?.color||'#a78bfa';
+    document.getElementById('tPlayBtn').classList.remove('brk');
+    if (tTimer.currentSubj) document.getElementById('tPlayBtn').style.background=`linear-gradient(135deg,${tTimer.currentSubj.color},${tDarken(tTimer.currentSubj.color)})`;
+    else document.getElementById('tPlayBtn').style.background='';
+  }
+  if (!tTimer.running) tReset();
+}
+
+function tApplyCustom() {
+  tTimer.customMin=parseInt(document.getElementById('tCustomMin').value)||45;
+  tReset(); showToast(`ตั้งเวลา ${tTimer.customMin} นาที แล้ว`,'info');
+}
+function tOnSettingChange() { if (!tTimer.running) tReset(); }
+
+function tReset() {
+  clearInterval(tTimer.intervalId);
+  tTimer.running=false; tTimer.timeLeft=tGetSecs(); tTimer.totalTime=tTimer.timeLeft; tTimer.sessionStart=null;
+  tUpdateDisplay();
+  document.getElementById('tPlayBtn').textContent='▶';
+  document.getElementById('tClockWrap').classList.remove('running');
+}
+
+function tToggle() {
+  if (!tTimer.currentSubj && tTimer.mode==='focus') { showToast('⚠️ เลือกวิชาก่อนเริ่มจับเวลา!','info'); return; }
+  if (tTimer.running) {
+    clearInterval(tTimer.intervalId); tTimer.running=false;
+    document.getElementById('tPlayBtn').textContent='▶';
+    document.getElementById('tClockWrap').classList.remove('running');
+    if (tTimer.mode==='focus' && tTimer.sessionStart) {
+      const elapsed=Math.floor((Date.now()-tTimer.sessionStart)/1000/60);
+      if (elapsed>=1) tSaveSession(elapsed,false);
+      tTimer.sessionStart=null;
+    }
+    showToast('⏸ หยุดพักชั่วคราว','info',1600);
+  } else {
+    tTimer.running=true;
+    document.getElementById('tPlayBtn').textContent='⏸';
+    document.getElementById('tClockWrap').classList.add('running');
+    if (tTimer.mode==='focus') tTimer.sessionStart=Date.now();
+    tTimer.intervalId=setInterval(tTick,1000);
+  }
+}
+
+function tTick() {
+  if (tTimer.timeLeft<=0) { tOnComplete(); return; }
+  tTimer.timeLeft--; tUpdateDisplay();
+}
+
+function tUpdateDisplay() {
+  const m=Math.floor(tTimer.timeLeft/60), s=tTimer.timeLeft%60;
+  const str=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('tClockTime').textContent=str;
+  document.getElementById('tClockMode').textContent=tGetLabel();
+  const pct=1-tTimer.timeLeft/tTimer.totalTime;
+  document.getElementById('tRingTrack').style.strokeDashoffset=T_CIRC*(1-pct);
+}
+
+function tOnComplete() {
+  clearInterval(tTimer.intervalId); tTimer.running=false;
+  document.getElementById('tPlayBtn').textContent='▶';
+  document.getElementById('tClockWrap').classList.remove('running');
+  tPlayBell();
+  if (tTimer.mode==='focus') {
+    const mins=Math.round(tTimer.totalTime/60);
+    tSaveSession(mins,true); tTimer.pomCount++; tSt.totalPom++; tUpdatePomDots();
+    if (tTimer.pomCount%4===0) { showToast('🎉 ครบ 4 รอบ! พักยาวสักครู่','success'); setTimeout(()=>{tSetMode('long');tToggle();},800); }
+    else { showToast('✅ เสร็จแล้ว! พักสั้น ☕','success'); setTimeout(()=>{tSetMode('short');tToggle();},800); }
+  } else { showToast('🍅 หมดเวลาพัก! กลับมา Focus กัน','info'); setTimeout(()=>tSetMode('focus'),600); }
+  tTimer.sessionStart=null; tSaveState();
+}
+
+function tSkip() {
+  clearInterval(tTimer.intervalId); tTimer.running=false; tTimer.sessionStart=null;
+  document.getElementById('tPlayBtn').textContent='▶';
+  document.getElementById('tClockWrap').classList.remove('running');
+  if (tTimer.mode==='focus') tSetMode('short'); else tSetMode('focus');
+  showToast('⏭ ข้ามรอบ','info',1500);
+}
+
+function tUpdatePomDots() {
+  for (let i=0;i<4;i++) {
+    const el=document.getElementById('tPd'+i);
+    if (!el) continue;
+    const filled=i<(tTimer.pomCount%4)||(tTimer.pomCount>0&&tTimer.pomCount%4===0&&i<4);
+    el.classList.toggle('lit',filled);
+  }
+  document.getElementById('tPomLbl').textContent=`${tSt.totalPom} รอบรวม`;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION W: STUDY TIMER — Sessions & Stats
+   ────────────────────────────────────────────────────────────── */
+
+function tSaveSession(mins, completed) {
+  if (mins<=0||!tTimer.currentSubj) return;
+  const s=tTimer.currentSubj;
+  const xp=mins*10+(completed?50:0);
+  tSt.sessions.unshift({ id:Date.now(), subject:s.name, emoji:s.emoji, color:s.color, minutes:mins, xp, completed, time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) });
+  if (tSt.sessions.length>100) tSt.sessions=tSt.sessions.slice(0,100);
+  tSt.totalMinutes+=mins; tSt.todayMinutes+=mins; tSt.totalSessions+=1; tSt.totalXP+=xp;
+  tSt.subjMinutes[s.name]=(tSt.subjMinutes[s.name]||0)+mins;
+  if (tSt.lastStudyDate!==T_TODAY) {
+    const yest=new Date(); yest.setDate(yest.getDate()-1);
+    tSt.streak = tSt.lastStudyDate===yest.toLocaleDateString('th-TH') ? tSt.streak+1 : 1;
+    tSt.lastStudyDate=T_TODAY;
+  }
+  const prevLv=tSt.level; tRecalcLv();
+  if (tSt.level>prevLv) showToast(`🎉 LEVEL UP! Level ${tSt.level} "${T_LEVELS.find(l=>l.lv===tSt.level)?.title}"!`,'success',4000);
+  tCheckAchiev(); tSaveState();
+  tRenderLog(); tRenderBreakdown(); tUpdateStats(); tUpdateXP(); tUpdateGoal(); tRenderAchiev();
+  tXpFloat(`+${xp} XP`);
+  const streakEl=document.getElementById('tStreakNum'); if(streakEl) streakEl.textContent=tSt.streak;
+}
+
+function tRecalcLv() {
+  let lv=1;
+  for (const l of T_LEVELS) { if (tSt.totalXP>=l.xp) lv=l.lv; }
+  tSt.level=lv;
+}
+
+function tRenderLog() {
+  const el=document.getElementById('tLogList'); if (!el) return;
+  if (!tSt.sessions.length) {
+    el.innerHTML=`<div class="t-empty-log"><div class="big">📚</div><p>ยังไม่มีเซสชัน<br>เลือกวิชาแล้วกด ▶ เพื่อเริ่ม!</p></div>`; return;
+  }
+  el.innerHTML=tSt.sessions.slice(0,20).map((s,i)=>`
+    <div class="t-log-item" style="animation-delay:${i*0.03}s">
+      <div class="t-log-emoji">${s.emoji}</div>
+      <div class="t-log-body">
+        <div class="t-log-subj" style="color:${s.color}">${escapeHTML(s.subject)}</div>
+        <div class="t-log-meta">${s.time} · ${s.completed?'✅ ครบรอบ':'⏸ หยุดพัก'}</div>
+      </div>
+      <div class="t-log-dur">${s.minutes} นาที</div>
+      <div class="t-log-xp">+${s.xp} XP</div>
+    </div>`).join('');
+}
+
+function tClearLog() {
+  if (!confirm('ล้างประวัติทั้งหมด?')) return;
+  tSt.sessions=[]; tSaveState(); tRenderLog(); showToast('ล้างประวัติแล้ว','info');
+}
+
+function tUpdateStats() {
+  const q=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  q('tStatDay', tSt.todayMinutes);
+  q('tStatSess', tSt.totalSessions);
+  q('tStatHr', Math.floor(tSt.totalMinutes/60)+'h');
+  q('tStatXP', tSt.totalXP);
+  q('tStreakNum', tSt.streak);
+}
+
+function tUpdateXP() {
+  tRecalcLv();
+  const lv=T_LEVELS.find(l=>l.lv===tSt.level)||T_LEVELS[0];
+  const nxt=T_LEVELS.find(l=>l.lv===tSt.level+1);
+  const q=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  q('tLvNum', tSt.level); q('tLvTitle', lv.title);
+  const fill=document.getElementById('tXpFill');
+  if (nxt) {
+    const pct=Math.min(((tSt.totalXP-lv.xp)/(nxt.xp-lv.xp))*100,100);
+    if(fill) fill.style.width=pct+'%';
+    q('tXpText', `${tSt.totalXP} / ${nxt.xp} XP`);
+  } else {
+    if(fill) fill.style.width='100%';
+    q('tXpText', `${tSt.totalXP} XP (MAX)`);
+  }
+}
+
+function tUpdateGoal() {
+  const pct=Math.min(tSt.todayMinutes/tSt.dailyGoal,1);
+  const C=2*Math.PI*30; // r=30
+  const ring=document.getElementById('tGoalRing');
+  if(ring) ring.style.strokeDashoffset=C*(1-pct);
+  const q=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  q('tGoalPct', Math.round(pct*100)+'%');
+  q('tGoalSub', `${tSt.todayMinutes} / ${tSt.dailyGoal} นาที`);
+  if (tSt.todayMinutes>0) {
+    const msgs = pct>=1?['🎉 ครบเป้าหมายแล้ว! เก่งมากเลย!','🏆 วันนี้เกินเป้า!']
+      : pct>=0.75?['💪 เกือบถึงแล้ว! อีกนิดเดียว!']
+      : pct>=0.5 ?['🔥 ครึ่งทางแล้ว! ไปต่อ!']
+      : pct>=0.25?['📖 เริ่มต้นดีแล้ว อย่าหยุด!']
+      : T_MOTIVATIONS;
+    const motEl=document.getElementById('tMotiv');
+    if(motEl) motEl.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  }
+}
+
+function tUpdateGoalFromInput() {
+  tSt.dailyGoal=parseInt(document.getElementById('tGoalInput').value)||120; tSaveState(); tUpdateGoal();
+}
+
+function tRenderBreakdown() {
+  const wrap=document.getElementById('tBreakdown'); if(!wrap) return;
+  const entries=Object.entries(tSt.subjMinutes).sort((a,b)=>b[1]-a[1]);
+  if (!entries.length) { wrap.innerHTML=`<div style="color:var(--text-muted);font-size:0.78rem;text-align:center;padding:16px 0">ยังไม่มีข้อมูล</div>`; return; }
+  const max=entries[0][1];
+  wrap.innerHTML=entries.slice(0,8).map(([name,mins],i)=>{
+    const subj=tSt.subjects.find(s=>s.name===name)||{emoji:'📖',color:'#a78bfa'};
+    const pct=Math.round(mins/max*100), h=Math.floor(mins/60), m=mins%60;
+    return `<div class="t-bk-item" style="animation-delay:${i*0.04}s">
+      <div class="t-bk-icon">${subj.emoji}</div>
+      <div class="t-bk-info"><div class="t-bk-name">${escapeHTML(name)}</div><div class="t-bk-time">${h>0?h+'h ':''} ${m}m</div></div>
+      <div class="t-bk-bar-w"><div class="t-bk-bar"><div class="t-bk-fill" style="width:${pct}%;background:${subj.color}"></div></div><div class="t-bk-pct">${pct}%</div></div>
+    </div>`;
+  }).join('');
+}
+
+function tCheckAchiev() {
+  T_ACHIEV.forEach(a => {
+    if (!tSt.earned.includes(a.id) && a.cond(tSt)) {
+      tSt.earned.push(a.id);
+      showToast(`🏅 ปลดล็อค "${a.name}" ${a.icon}`,'success',4000);
+    }
+  });
+}
+
+function tRenderAchiev() {
+  const grid=document.getElementById('tAchGrid'); if(!grid) return;
+  grid.innerHTML=T_ACHIEV.map(a=>`
+    <div class="t-badge ${tSt.earned.includes(a.id)?'earned':''}" title="${a.name}">
+      <div class="t-badge-icon">${a.icon}</div>
+      <div class="t-badge-name">${a.name}</div>
+    </div>`).join('');
+}
+
+function tPlayBell() {
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [[0,880],[0.3,1100],[0.6,880]].forEach(([t,freq])=>{
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value=freq; osc.type='sine';
+      gain.gain.setValueAtTime(0.4,ctx.currentTime+t);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.7);
+      osc.start(ctx.currentTime+t); osc.stop(ctx.currentTime+t+0.8);
+    });
+  } catch(e){}
+}
+
+function tXpFloat(text) {
+  const el=document.createElement('div'); el.className='t-xp-popup'; el.textContent=text;
+  el.style.left=(window.innerWidth/2-30)+'px'; el.style.top=(window.innerHeight/2)+'px';
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1700);
+}
+
+// Keyboard shortcut only active on timer page
+document.addEventListener('keydown', e => {
+  if (state?.currentPage !== 'timer') return;
+  if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if (e.code==='Space') { e.preventDefault(); tToggle(); }
+  if (e.code==='KeyR'&&!e.ctrlKey) tReset();
+  if (e.code==='KeyS') tSkip();
+});
+
+
+// เรียก init เมื่อ DOM พร้อม
+document.addEventListener('DOMContentLoaded', init);
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('subjectModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeSubjectModal();
+  });
+});
+</script>
+</body>
+</html>
